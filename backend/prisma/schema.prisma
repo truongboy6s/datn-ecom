@@ -1,0 +1,143 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                         String        @id @default(uuid())
+  name                       String
+  email                      String        @unique
+  password                   String
+  role                       Role          @default(USER)
+  avatarUrl                  String?
+  emailVerified              Boolean       @default(false)
+  emailVerificationToken     String?       @unique
+  emailVerificationExpiresAt DateTime?
+  orders                     Order[]
+  reviews                    Review[]
+  chats                      ChatMessage[]
+  createdAt                  DateTime      @default(now())
+  updatedAt                  DateTime      @updatedAt
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String
+  slug        String    @unique
+  description String?
+  products    Product[]
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  name        String
+  description String
+  price       Float
+  stock       Int
+  imageUrl    String?
+  categoryId  String
+  category    Category    @relation(fields: [categoryId], references: [id])
+  orderItems  OrderItem[]
+  reviews     Review[]
+  createdAt   DateTime    @default(now())
+}
+
+model Order {
+  id            String        @id @default(uuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id])
+  totalPrice    Float
+  status        OrderStatus   @default(PENDING)
+  paymentMethod PaymentMethod
+  paymentStatus PaymentStatus @default(PENDING)
+  items         OrderItem[]
+  createdAt     DateTime      @default(now())
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Float
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  rating    Int
+  comment   String?
+  userId    String
+  productId String
+  user      User     @relation(fields: [userId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  role      ChatRole
+  message   String
+  createdAt DateTime @default(now())
+}
+
+model AIInsight {
+  id        String   @id @default(uuid())
+  type      String
+  result    Json
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  COD
+  MOMO
+  VNPAY
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+enum ChatRole {
+  USER
+  ASSISTANT
+}
+
+model Discount {
+  id           String        @id @default(uuid())
+  code         String        @unique
+  description  String?
+  discount     Float
+  discountType DiscountType
+  maxUses      Int?
+  usesCount    Int           @default(0)
+  isActive     Boolean       @default(true)
+  expiresAt    DateTime?
+  createdAt    DateTime      @default(now())
+}
+
+enum DiscountType {
+  percentage
+  fixed
+}

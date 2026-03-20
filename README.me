@@ -1,0 +1,1000 @@
+# 🤖 AI E-Commerce Platform
+
+## Website thương mại điện tử bán đồ điện tử tích hợp AI hỗ trợ kinh doanh
+
+---
+
+# 1. Giới thiệu
+
+Dự án xây dựng một **website thương mại điện tử bán đồ điện tử** tích hợp **AI chatbot và AI phân tích kinh doanh** giúp:
+
+* khách hàng tìm kiếm sản phẩm nhanh hơn
+* doanh nghiệp phân tích dữ liệu bán hàng
+* đưa ra chiến lược kinh doanh hiệu quả
+
+---
+
+# 2. Công nghệ sử dụng
+
+| Thành phần     | Công nghệ             |
+| -------------- | --------------------- |
+| Frontend       | Next.js + TypeScript  |
+| Backend        | Node.js + Express + TypeScript |
+| Database       | PostgreSQL            |
+| ORM            | Prisma                |
+| Authentication | NextAuth              |
+| AI Model       | Gemini / OpenAI API   |
+| Email          | Nodemailer            |
+| Payment        | MoMo / VNPay          |
+| Deploy         | Vercel / Docker       |
+
+---
+
+# 3. Kiến trúc hệ thống
+
+```
+Client (Browser)
+        │
+        │ HTTP Request
+        ▼
+Next.js Application
+        │
+        ├ API Routes
+        │
+        ├ Authentication
+        │
+        ▼
+Backend Services
+        │
+        ├ PostgreSQL Database
+        │
+        ├ AI Service
+        │
+        └ Payment Gateway
+```
+
+---
+
+# 4. Các chức năng chính
+
+## 4.1 Khách hàng
+
+* đăng ký tài khoản
+* đăng nhập
+* xác thực email
+* tìm kiếm sản phẩm
+* xem chi tiết sản phẩm
+* thêm vào giỏ hàng
+* thanh toán online
+* theo dõi đơn hàng
+* chat với AI để gợi ý sản phẩm
+
+---
+
+## 4.2 Quản trị viên
+
+* quản lý sản phẩm
+* quản lý danh mục
+* quản lý đơn hàng
+* quản lý người dùng
+* xem dashboard doanh thu
+* AI phân tích dữ liệu bán hàng
+
+---
+
+# 5. Thiết kế cơ sở dữ liệu (ERD)
+
+## Users
+
+```
+Users
+-----
+id
+name
+email
+password
+role
+email_verified
+created_at
+```
+
+---
+
+## Categories
+
+```
+Categories
+-----------
+id
+name
+description
+```
+
+---
+
+## Products
+
+```
+Products
+---------
+id
+name
+price
+stock
+description
+image_url
+category_id
+created_at
+```
+
+---
+
+## Orders
+
+```
+Orders
+-------
+id
+user_id
+status
+total_price
+payment_method
+payment_status
+created_at
+```
+
+---
+
+## OrderItems
+
+```
+OrderItems
+-----------
+id
+order_id
+product_id
+quantity
+price
+```
+
+---
+
+## ChatMessages
+
+```
+ChatMessages
+-------------
+id
+user_id
+role
+message
+created_at
+```
+
+---
+
+## AI_Insights
+
+```
+AI_Insights
+------------
+id
+analysis_type
+result_json
+created_at
+```
+
+---
+
+# 6. ERD Diagram
+
+```
+Users
+ │
+ │ 1:N
+ ▼
+Orders
+ │
+ │ 1:N
+ ▼
+OrderItems
+ │
+ │ N:1
+ ▼
+Products
+ │
+ │ N:1
+ ▼
+Categories
+```
+
+---
+
+# 7. Use Case Diagram (UML)
+
+## Actors
+
+* Customer
+* Admin
+* AI System
+* Payment Gateway
+
+---
+
+## Customer Use Cases
+
+```
+Customer
+ ├ Register
+ ├ Login
+ ├ Browse Products
+ ├ Search Products
+ ├ Add to Cart
+ ├ Checkout
+ ├ Pay Online
+ ├ Track Order
+ └ Chat with AI
+```
+
+---
+
+## Admin Use Cases
+
+```
+Admin
+ ├ Manage Products
+ ├ Manage Categories
+ ├ Manage Orders
+ ├ Manage Users
+ ├ View Dashboard
+ └ Run AI Analysis
+```
+
+---
+
+# 8. Activity Diagram (Checkout)
+
+```
+User
+ │
+ ▼
+Add to Cart
+ │
+ ▼
+Checkout
+ │
+ ▼
+Select Payment Method
+ │
+ ├ MoMo
+ └ VNPay
+ │
+ ▼
+Payment Gateway
+ │
+ ▼
+Payment Result
+ │
+ ▼
+Order Completed
+```
+
+---
+
+# 9. AI Chatbot gợi ý sản phẩm
+
+AI chatbot giúp khách hàng tìm sản phẩm bằng hội thoại.
+
+Ví dụ:
+
+User
+
+```
+Laptop dưới 20 triệu
+```
+
+AI
+
+```
+Bạn có thể tham khảo:
+
+1. Dell Inspiron 15
+2. Asus Vivobook
+3. HP Pavilion
+```
+
+---
+
+# 10. Prompt Engineering cho AI
+
+```
+Bạn là trợ lý bán hàng cho website thương mại điện tử.
+
+Danh sách sản phẩm:
+[PRODUCT LIST]
+
+Câu hỏi khách hàng:
+[USER QUESTION]
+
+Nhiệm vụ:
+
+1. gợi ý tối đa 3 sản phẩm
+2. giải thích lý do
+3. đề xuất sản phẩm phù hợp
+```
+
+---
+
+# 11. AI Business Analysis
+
+AI phân tích dữ liệu bán hàng:
+
+* sản phẩm bán chạy
+* sản phẩm tồn kho
+* xu hướng bán hàng
+
+Ví dụ output:
+
+```
+Top selling product: iPhone 15
+Recommendation: Increase stock
+```
+
+---
+
+# 12. API Endpoints
+
+## Auth API
+
+```
+POST /api/auth/register
+POST /api/auth/login
+GET /api/auth/me
+```
+
+---
+
+## Product API
+
+```
+GET /api/products
+GET /api/products/:id
+POST /api/products
+PUT /api/products/:id
+DELETE /api/products/:id
+```
+
+---
+
+## Order API
+
+```
+POST /api/orders
+GET /api/orders
+PUT /api/orders/:id/status
+```
+
+---
+
+## Chatbot API
+
+```
+POST /api/chat
+```
+
+---
+
+# 13. Thanh toán online
+
+Hệ thống hỗ trợ thanh toán qua:
+
+* MoMo
+* VNPay
+
+---
+
+# 14. Setup MoMo Payment (Test)
+
+## Bước 1: Đăng ký MoMo Sandbox
+
+Truy cập:
+
+```
+https://developers.momo.vn
+```
+
+Tạo **Sandbox Account**.
+
+Sau khi tạo sẽ nhận:
+
+```
+PartnerCode
+AccessKey
+SecretKey
+Endpoint
+```
+
+---
+
+## Bước 2: Cấu hình environment
+
+```
+MOMO_PARTNER_CODE=
+MOMO_ACCESS_KEY=
+MOMO_SECRET_KEY=
+MOMO_ENDPOINT=https://test-payment.momo.vn
+```
+
+---
+
+## Bước 3: Tạo request thanh toán
+
+```
+POST https://test-payment.momo.vn/v2/gateway/api/create
+```
+
+Request example
+
+```
+{
+ "partnerCode":"MOMO",
+ "amount":"100000",
+ "orderId":"12345",
+ "orderInfo":"Payment order",
+ "redirectUrl":"http://localhost:3000/payment-success",
+ "ipnUrl":"http://localhost:3000/api/payment/momo/callback"
+}
+```
+
+---
+
+# 15. Setup VNPay Payment (Test)
+
+## Bước 1: Đăng ký sandbox
+
+```
+https://sandbox.vnpayment.vn
+```
+
+Nhận thông tin:
+
+```
+vnp_TmnCode
+vnp_HashSecret
+```
+
+---
+
+## Bước 2: Cấu hình environment
+
+```
+VNP_TMNCODE=
+VNP_HASH_SECRET=
+VNP_URL=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+```
+
+---
+
+## Bước 3: Tạo URL thanh toán
+
+```
+https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+```
+
+Parameters:
+
+```
+vnp_Amount
+vnp_OrderInfo
+vnp_ReturnUrl
+vnp_TxnRef
+```
+
+---
+
+# 16. Payment Workflow
+
+```
+User checkout
+      ↓
+Create Order
+      ↓
+Select Payment Method
+      ↓
+Redirect Payment Gateway
+      ↓
+User Pay
+      ↓
+Gateway callback
+      ↓
+Update Order Status
+```
+
+---
+
+# 17. Bảo mật hệ thống
+
+* hash password bằng bcrypt
+* JWT authentication
+* HTTPS
+* verify payment signature
+
+---
+
+# 18. Setup Project
+
+## Clone project
+
+```
+git clone https://github.com/your-repo/ai-ecommerce
+cd ai-ecommerce
+```
+
+---
+
+## Install dependencies
+
+```
+npm install
+```
+
+---
+
+## Start PostgreSQL (Docker)
+
+```
+docker compose up -d
+```
+
+---
+
+## Setup environment
+
+Tạo file `.env` cho backend từ `backend/.env.example`:
+
+```
+PORT=4000
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/datn_ecom?schema=public
+JWT_SECRET=replace_me
+
+GEMINI_API_KEY=
+OPENAI_API_KEY=
+
+MOMO_PARTNER_CODE=
+MOMO_ACCESS_KEY=
+MOMO_SECRET_KEY=
+MOMO_ENDPOINT=https://test-payment.momo.vn
+
+VNP_TMNCODE=
+VNP_HASH_SECRET=
+VNP_URL=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+```
+
+Tạo file `.env.local` cho frontend từ `frontend/.env.example`:
+
+```
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=replace_me
+NEXT_PUBLIC_API_BASE_URL=http://localhost:4000
+```
+
+---
+
+## Run Prisma migration
+
+```
+npm run prisma:generate -w backend
+npm run prisma:migrate -w backend
+```
+
+---
+
+## Run project
+
+```
+npm run dev
+```
+
+---
+
+# 19. Kết luận
+
+Hệ thống thương mại điện tử tích hợp AI giúp:
+
+* khách hàng tìm sản phẩm nhanh
+* doanh nghiệp phân tích dữ liệu bán hàng
+* tối ưu chiến lược kinh doanh
+
+Hệ thống có thể mở rộng trong tương lai:
+
+* recommendation system
+* voice chatbot
+* dự đoán doanh thu bằng machine learning
+* phân tích hành vi người dùng
+
+# 20. System Architecture Diagram
+
+Kiến trúc hệ thống được thiết kế theo mô hình **Frontend – Backend – Database – AI Service – Payment Gateway**.
+
+```text
+                ┌────────────────────┐
+                │      Client        │
+                │  (Browser / App)  │
+                └─────────┬──────────┘
+                          │
+                          │ HTTP Request
+                          ▼
+                ┌────────────────────┐
+                │      Frontend      │
+                │     Next.js        │
+                │  React + TypeScript│
+                └─────────┬──────────┘
+                          │
+                          │ API Request
+                          ▼
+                ┌────────────────────┐
+                │       Backend      │
+                │  Next.js API /     │
+                │     Node.js        │
+                └─────────┬──────────┘
+                          │
+         ┌────────────────┼─────────────────┐
+         │                │                 │
+         ▼                ▼                 ▼
+ ┌──────────────┐  ┌──────────────┐  ┌───────────────┐
+ │  PostgreSQL  │  │  AI Service  │  │ Payment Gate  │
+ │   Database   │  │  LLM API     │  │ MoMo / VNPay  │
+ └──────────────┘  └──────────────┘  └───────────────┘
+```
+
+### Mô tả
+
+**Frontend**
+
+* xây dựng bằng Next.js
+* hiển thị sản phẩm
+* chat AI
+* thanh toán
+
+**Backend**
+
+* xử lý API
+* authentication
+* order management
+* AI integration
+
+**Database**
+
+* lưu dữ liệu user
+* sản phẩm
+* đơn hàng
+* chat history
+
+**AI Service**
+
+* chatbot gợi ý sản phẩm
+* phân tích dữ liệu bán hàng
+
+**Payment Gateway**
+
+* MoMo
+* VNPay
+
+---
+
+# 21. Sequence Diagram – Payment Flow
+
+## Thanh toán MoMo / VNPay
+
+```text
+User
+ │
+ │ Click Checkout
+ ▼
+Frontend
+ │
+ │ Create Order API
+ ▼
+Backend
+ │
+ │ Save Order
+ ▼
+Database
+ │
+ │
+ ▼
+Backend
+ │
+ │ Generate Payment URL
+ ▼
+Payment Gateway
+ │
+ │ Redirect User
+ ▼
+User
+ │
+ │ Payment
+ ▼
+Payment Gateway
+ │
+ │ Callback Result
+ ▼
+Backend
+ │
+ │ Verify Signature
+ │
+ │ Update Order Status
+ ▼
+Database
+ │
+ ▼
+Frontend
+ │
+ ▼
+Payment Success Page
+```
+
+---
+
+# 22. Sequence Diagram – AI Chatbot
+
+```text
+User
+ │
+ │ Send message
+ ▼
+Frontend Chat UI
+ │
+ │ POST /api/chat
+ ▼
+Backend
+ │
+ │ Query Products
+ ▼
+Database
+ │
+ │ Return product list
+ ▼
+Backend
+ │
+ │ Generate Prompt
+ ▼
+LLM API
+ │
+ │ AI Response
+ ▼
+Backend
+ │
+ │ Send reply
+ ▼
+Frontend
+ │
+ ▼
+User Chat Interface
+```
+
+---
+
+# 23. Prisma Schema (PostgreSQL)
+
+Dưới đây là schema Prisma đầy đủ cho hệ thống.
+
+```prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  emailVerified Boolean @default(false)
+
+  orders    Order[]
+  reviews   Review[]
+  chats     ChatMessage[]
+
+  createdAt DateTime @default(now())
+}
+
+model Category {
+
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+
+  products    Product[]
+}
+
+model Product {
+
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  price       Float
+  stock       Int
+  imageUrl    String?
+
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+
+  orderItems  OrderItem[]
+  reviews     Review[]
+
+  createdAt   DateTime @default(now())
+}
+
+model Order {
+
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+
+  totalPrice  Float
+  status      OrderStatus @default(PENDING)
+
+  paymentMethod PaymentMethod
+  paymentStatus PaymentStatus @default(PENDING)
+
+  items       OrderItem[]
+
+  createdAt   DateTime @default(now())
+}
+
+model OrderItem {
+
+  id        String @id @default(uuid())
+
+  orderId   String
+  order     Order @relation(fields: [orderId], references: [id])
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  quantity  Int
+  price     Float
+}
+
+model Review {
+
+  id        String @id @default(uuid())
+
+  rating    Int
+  comment   String?
+
+  userId    String
+  productId String
+
+  user      User    @relation(fields: [userId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model ChatMessage {
+
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  role      ChatRole
+  message   String
+
+  createdAt DateTime @default(now())
+}
+
+model AIInsight {
+
+  id        String   @id @default(uuid())
+  type      String
+  result    Json
+
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+
+  USER
+  ADMIN
+}
+
+enum OrderStatus {
+
+  PENDING
+  PROCESSING
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentMethod {
+
+  COD
+  MOMO
+  VNPAY
+}
+
+enum PaymentStatus {
+
+  PENDING
+  PAID
+  FAILED
+}
+
+enum ChatRole {
+
+  USER
+  ASSISTANT
+}
+```
+
+---
+
+# 24. Database Migration
+
+Sau khi tạo schema:
+
+```bash
+npx prisma migrate dev
+```
+
+Generate client:
+
+```bash
+npx prisma generate
+```
+
+---
+
+# 25. Ví dụ Query Prisma
+
+## Lấy sản phẩm
+
+```ts
+const products = await prisma.product.findMany({
+  include: {
+    category: true
+  }
+})
+```
+
+---
+
+## Tạo đơn hàng
+
+```ts
+const order = await prisma.order.create({
+  data: {
+    userId: user.id,
+    totalPrice: total,
+    paymentMethod: "MOMO"
+  }
+})
+```
+
+---
+
+# 26. Tổng kết kiến trúc
+
+Hệ thống gồm **4 module chính**
+
+| Module     | Chức năng                   |
+| ---------- | --------------------------- |
+| Frontend   | giao diện người dùng        |
+| Backend    | API + business logic        |
+| AI Service | chatbot + phân tích dữ liệu |
+| Payment    | MoMo + VNPay                |
+
+Kiến trúc này giúp hệ thống:
+
+* dễ mở rộng
+* dễ bảo trì
+* tích hợp AI linh hoạt
+* tích hợp nhiều phương thức thanh toán

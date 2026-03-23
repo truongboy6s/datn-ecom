@@ -56,6 +56,42 @@ export default function AdminOrdersPage() {
     }
   };
 
+  const handleConfirm = async (id: string) => {
+    try {
+      const updated = await adminService.confirmOrder(id);
+      setOrders((prev) => prev.map((o) => (o.id === id ? updated : o)));
+    } catch (err: any) {
+      setError(err.message || "Lỗi xác nhận đơn hàng.");
+    }
+  };
+
+  const handleShip = async (id: string) => {
+    try {
+      const updated = await adminService.shipOrder(id);
+      setOrders((prev) => prev.map((o) => (o.id === id ? updated : o)));
+    } catch (err: any) {
+      setError(err.message || "Lỗi chuyển sang giao hàng.");
+    }
+  };
+
+  const handleCancel = async (id: string) => {
+    try {
+      const updated = await adminService.cancelOrder(id);
+      setOrders((prev) => prev.map((o) => (o.id === id ? updated : o)));
+    } catch (err: any) {
+      setError(err.message || "Lỗi hủy đơn hàng.");
+    }
+  };
+
+  const handleRefund = async (id: string) => {
+    try {
+      const updated = await adminService.refundOrder(id);
+      setOrders((prev) => prev.map((o) => (o.id === id ? updated : o)));
+    } catch (err: any) {
+      setError(err.message || "Lỗi hoàn tiền.");
+    }
+  };
+
   function getStatusStyle(status: string) {
     const s = status.toLowerCase();
     return `status-chip status-chip--${s}`;
@@ -76,12 +112,13 @@ export default function AdminOrdersPage() {
             <th>Trạng thái đặt hàng</th>
             <th>Trạng thái thanh toán</th>
             <th>Ngày tạo</th>
+            <th>Hành động</th>
           </tr>
         </thead>
         <tbody>
           {loading ? (
             <tr>
-              <td colSpan={6} style={{ textAlign: "center", color: "var(--muted)", padding: "20px" }}>
+              <td colSpan={7} style={{ textAlign: "center", color: "var(--muted)", padding: "20px" }}>
                 Đang tải đơn hàng...
               </td>
             </tr>
@@ -130,6 +167,30 @@ export default function AdminOrdersPage() {
                   month: "2-digit",
                   year: "numeric",
                 })}
+              </td>
+              <td>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                  {order.status === OrderStatus.PENDING ? (
+                    <button className="btn-sm" onClick={() => handleConfirm(order.id)}>
+                      Xác nhận
+                    </button>
+                  ) : null}
+                  {order.status === OrderStatus.CONFIRMED ? (
+                    <button className="btn-sm" onClick={() => handleShip(order.id)}>
+                      Giao hàng
+                    </button>
+                  ) : null}
+                  {order.status === OrderStatus.PENDING || order.status === OrderStatus.CONFIRMED ? (
+                    <button className="btn-sm btn-outline" onClick={() => handleCancel(order.id)}>
+                      Hủy đơn
+                    </button>
+                  ) : null}
+                  {order.paymentMethod === "MOMO" && order.paymentStatus === PaymentStatus.PAID ? (
+                    <button className="btn-sm btn-outline" onClick={() => handleRefund(order.id)}>
+                      Hoàn tiền
+                    </button>
+                  ) : null}
+                </div>
               </td>
             </tr>
           ))}

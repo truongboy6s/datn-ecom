@@ -14,8 +14,10 @@ export class PaymentService {
     const orderId = order.id;
     const orderInfo = `Pay for order ${order.id}`;
     const amount = order.totalPrice.toString();
-    const redirectUrl = `http://localhost:3000/payment-success`;
-    const ipnUrl = `http://localhost:4000/api/payment/momo/callback`;
+    const frontendBaseUrl = env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const backendBaseUrl = `http://localhost:${env.PORT}`;
+    const redirectUrl = `${frontendBaseUrl}/orders`;
+    const ipnUrl = `${backendBaseUrl}/api/payment/momo/callback`;
     const requestType = "captureWallet";
     const extraData = "";
     const requestId = orderId + new Date().getTime();
@@ -42,9 +44,26 @@ export class PaymentService {
       lang: "vi",
     };
 
-    // return the url based on a mock request if we don't have a real endpoint integration mapped. 
-    // In production, we'd do a fetch to momo endpoint here.
-    return `${endpoint}/v2/gateway/pay?${new URLSearchParams(requestBody as any).toString()}`;
+    const response = await fetch(`${endpoint}/v2/gateway/api/create`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    const responseBody = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message = responseBody?.message || "MoMo payment creation failed";
+      throw new Error(message);
+    }
+
+    const payUrl = responseBody?.payUrl || responseBody?.deeplink || responseBody?.qrCodeUrl;
+    if (!payUrl) {
+      throw new Error("MoMo response missing payUrl");
+    }
+
+    return payUrl;
   }
 
   static verifyMoMoSignature(data: any) {
@@ -88,5 +107,13 @@ export class PaymentService {
     // Sort params and create hash string
     // Simplified for mockup
     return true; // Assume validation passes for dev
+  }
+
+  static async refundMoMoPayment(order: Order) {
+    if (!env.MOMO_PARTNER_CODE) return true;
+
+    // TODO: Integrate MoMo refund API when available in production.
+    // This stub allows order flow to proceed in development.
+    return true;
   }
 }

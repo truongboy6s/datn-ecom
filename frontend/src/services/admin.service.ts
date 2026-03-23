@@ -159,6 +159,38 @@ export const adminService = {
     return res.data;
   },
 
+  async confirmOrder(orderId: string, token?: string) {
+    const res = await apiRequest<{ data: Order }>(`/admin/orders/${orderId}/confirm`, {
+      method: "POST",
+      token,
+    });
+    return res.data;
+  },
+
+  async shipOrder(orderId: string, token?: string) {
+    const res = await apiRequest<{ data: Order }>(`/admin/orders/${orderId}/ship`, {
+      method: "POST",
+      token,
+    });
+    return res.data;
+  },
+
+  async cancelOrder(orderId: string, token?: string) {
+    const res = await apiRequest<{ data: Order }>(`/admin/orders/${orderId}/cancel`, {
+      method: "POST",
+      token,
+    });
+    return res.data;
+  },
+
+  async refundOrder(orderId: string, token?: string) {
+    const res = await apiRequest<{ data: Order }>(`/admin/orders/${orderId}/refund`, {
+      method: "POST",
+      token,
+    });
+    return res.data;
+  },
+
   async listUsers(token?: string) {
     const res = await apiRequest<{ data: Array<{ id: string; name: string; email: string; role: string; createdAt: string }> }>(
       "/admin/users",

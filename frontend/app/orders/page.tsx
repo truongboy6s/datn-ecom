@@ -2,16 +2,22 @@
 
 import { useEffect, useState } from "react";
 import { apiClient } from "@/lib/api";
-import { getOrderStatusIndex } from "@/data/store-mock"; // Keeping pure functional utility imports
 import Link from "next/link";
 import { reviewService } from "@/services/review.service";
+import { orderService } from "@/services/order.service";
 
-const ORDER_STEPS = ["Chờ xử lý", "Đang xử lý", "Hoàn thành"];
+const ORDER_STEPS = ["Chờ xác nhận", "Đã xác nhận", "Đang giao", "Đã giao"];
+const ORDER_STATUS_STEPS = ["PENDING", "CONFIRMED", "SHIPPING", "DELIVERED"];
+
+function getOrderStatusIndex(status: string) {
+  return ORDER_STATUS_STEPS.indexOf(status);
+}
 
 function getStatusChipClass(status: string) {
   switch (status) {
-    case "COMPLETED": return "status-chip status-chip--completed";
-    case "PROCESSING": return "status-chip status-chip--processing";
+    case "DELIVERED": return "status-chip status-chip--completed";
+    case "SHIPPING": return "status-chip status-chip--processing";
+    case "CONFIRMED": return "status-chip status-chip--processing";
     case "CANCELLED": return "status-chip status-chip--cancelled";
     default: return "status-chip status-chip--pending";
   }
@@ -20,6 +26,7 @@ function getStatusChipClass(status: string) {
 function getPaymentChipClass(status: string) {
   switch (status) {
     case "PAID": return "status-chip status-chip--paid";
+    case "REFUNDED": return "status-chip status-chip--refunded";
     case "FAILED": return "status-chip status-chip--failed";
     default: return "status-chip status-chip--pending";
   }
@@ -27,14 +34,26 @@ function getPaymentChipClass(status: string) {
 
 function statusLabel(status: string) {
   switch (status) {
-    case "COMPLETED": return "Hoàn thành";
-    case "PROCESSING": return "Đang xử lý";
+    case "DELIVERED": return "Đã giao";
+    case "SHIPPING": return "Đang giao";
+    case "CONFIRMED": return "Đã xác nhận";
     case "CANCELLED": return "Đã hủy";
-    case "PENDING": return "Chờ xử lý";
+    case "PENDING": return "Chờ xác nhận";
     case "PAID": return "Đã thanh toán";
-    case "FAILED": return "Thất bại";
+    case "FAILED": return "Thanh toán thất bại";
+    case "REFUNDED": return "Đã hoàn tiền";
     default: return status;
   }
+}
+
+function orderStatusLabel(status: string, paymentStatus: string) {
+  if (status === "PENDING" && paymentStatus === "FAILED") {
+    return "Chờ thanh toán lại";
+  }
+  if (status === "PENDING" && paymentStatus === "PENDING") {
+    return "Chờ thanh toán";
+  }
+  return statusLabel(status);
 }
 
 export default function OrdersPage() {
@@ -94,7 +113,7 @@ export default function OrdersPage() {
                   </span>
                 </div>
                 <span className={getStatusChipClass(order.status)}>
-                  {statusLabel(order.status)}
+                  {orderStatusLabel(order.status, order.paymentStatus)}
                 </span>
               </div>
 
@@ -142,6 +161,51 @@ export default function OrdersPage() {
                     {statusLabel(order.paymentStatus)}
                   </span>
                 </div>
+                {order.status === "PENDING" ? (
+                  <div className="order-card__detail" style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    {(order.paymentStatus === "FAILED" || order.paymentStatus === "PENDING") && order.paymentMethod === "MOMO" ? (
+                      <button
+                        className="btn-sm"
+                        onClick={async () => {
+                          try {
+                            const res = await orderService.createMoMoPayment(order.id);
+                            const paymentUrl = res?.data?.paymentUrl;
+                            if (paymentUrl) {
+                              window.location.href = paymentUrl;
+                            }
+                          } catch (err: any) {
+                            setError(err.message || "Khong the tao lai thanh toan.");
+                          }
+                        }}
+                      >
+                        Thanh toán lại
+                      </button>
+                    ) : null}
+                    <button
+                      className="btn-sm btn-outline"
+                      onClick={async () => {
+                        try {
+                          const res = await orderService.cancelOrder(order.id);
+                          const updated = res?.data;
+                          if (updated) {
+                            setOrders((prev) => prev.map((o) => (o.id === order.id ? updated : o)));
+                          }
+                        } catch (err: any) {
+                          setError(err.message || "Khong the huy don.");
+                        }
+                      }}
+                    >
+                      Hủy đơn
+                    </button>
+                  </div>
+                ) : null}
+                {order.status === "DELIVERED" ? (
+                  <div className="order-card__detail">
+                    <button className="btn-sm btn-outline" disabled>
+                      Yeu cau hoan hang
+                    </button>
+                  </div>
+                ) : null}
               </div>
 
               {/* Items */}
@@ -162,7 +226,7 @@ export default function OrdersPage() {
                         <p style={{ margin: 0, fontSize: ".8rem", color: "var(--muted)" }}>
                           {item.quantity} × {item.price.toLocaleString("vi-VN")}₫
                         </p>
-                        {order.status === "COMPLETED" && item.product?.id ? (
+                        {order.status === "DELIVERED" && item.product?.id ? (
                           <div style={{ marginTop: 8 }}>
                             {reviewedProductIds[item.product.id] ? (
                               <span style={{ color: "var(--success)", fontSize: ".82rem" }}>✓ Đã đánh giá</span>
@@ -186,7 +250,7 @@ export default function OrdersPage() {
                             )}
                           </div>
                         ) : null}
-                        {order.status === "COMPLETED" && item.product?.id && reviewStates[item.product.id]?.open ? (
+                        {order.status === "DELIVERED" && item.product?.id && reviewStates[item.product.id]?.open ? (
                           <div style={{ marginTop: 8 }}>
                             {reviewStates[item.product.id]?.error ? (
                               <p style={{ color: "#ef4444", fontSize: ".82rem", margin: "6px 0" }}>

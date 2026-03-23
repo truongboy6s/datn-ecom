@@ -11,7 +11,7 @@ export class OrderService {
     discountCode?: string
   ) {
     let totalPrice = 0;
-    const validatedItems = [];
+    const validatedItems: Array<{ productId: string; quantity: number; price: number }> = [];
 
     for (const item of items) {
       const product = await ProductRepository.findById(item.productId);
@@ -92,5 +92,13 @@ export class OrderService {
 
   static async getUserOrders(userId: string) {
     return OrderRepository.findByUserId(userId);
+  }
+
+  static async getOrderById(orderId: string) {
+    return OrderRepository.findById(orderId);
+  }
+
+  static async updateOrder(orderId: string, data: { status?: string; paymentStatus?: string }) {
+    return OrderRepository.updateById(orderId, data);
   }
 }

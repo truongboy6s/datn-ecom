@@ -954,16 +954,16 @@ p  { margin: 0 0 8px;  line-height: 1.65; }
   font-weight: 600; white-space: nowrap;
 }
 .status-chip--default { background: #eef2ff; color: #334155; }
-.status-chip--success, .status-chip--paid, .status-chip--completed {
+.status-chip--success, .status-chip--paid, .status-chip--completed, .status-chip--delivered {
   background: var(--success-bg); color: var(--success);
 }
-.status-chip--warning, .status-chip--pending, .status-chip--processing {
+.status-chip--warning, .status-chip--pending, .status-chip--processing, .status-chip--confirmed, .status-chip--shipping {
   background: var(--warning-bg); color: #b45309;
 }
 .status-chip--danger, .status-chip--cancelled, .status-chip--failed {
   background: var(--danger-bg); color: var(--danger);
 }
-.status-chip--info { background: var(--info-bg); color: var(--info); }
+.status-chip--info, .status-chip--refunded { background: var(--info-bg); color: var(--info); }
 .status-chip--admin { background: #ede9fe; color: #6d28d9; }
 .status-chip--user { background: #ecf4ff; color: #1e40af; }
 

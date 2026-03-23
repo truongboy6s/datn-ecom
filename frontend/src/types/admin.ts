@@ -8,3 +8,11 @@ export interface StatusShareItem {
   value: number;
   color: string;
 }
+
+export interface AdminUserItem {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  createdAt: string;
+}

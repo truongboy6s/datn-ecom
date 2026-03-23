@@ -7,7 +7,7 @@ import { OrderStatusChart } from "@/components/charts/OrderStatusChart";
 import { RevenueBarChart } from "@/components/charts/RevenueBarChart";
 import { adminService } from "@/services/admin.service";
 import type { AdminRevenuePoint, StatusShareItem } from "@/types/admin";
-import { OrderStatus, type Order } from "@/types/domain";
+import { OrderStatus, type Order, ORDER_STATUS_VIETNAMESE, PAYMENT_STATUS_VIETNAMESE } from "@/types/domain";
 
 export default function AdminDashboardPage() {
   const [metrics, setMetrics] = useState({ revenue: 0, totalOrders: 0, totalUsers: 0, topProduct: "" });
@@ -121,12 +121,12 @@ export default function AdminDashboardPage() {
                 <td>{order.totalPrice.toLocaleString("vi-VN")}₫</td>
                 <td>
                   <span className={`status-chip status-chip--${order.status.toLowerCase()}`}>
-                    {order.status}
+                    {ORDER_STATUS_VIETNAMESE[order.status] || order.status}
                   </span>
                 </td>
                 <td>
                   <span className={`status-chip status-chip--${order.paymentStatus.toLowerCase()}`}>
-                    {order.paymentStatus}
+                    {PAYMENT_STATUS_VIETNAMESE[order.paymentStatus] || order.paymentStatus}
                   </span>
                 </td>
                 <td style={{ color: "var(--muted)", fontSize: ".85rem" }}>
@@ -182,9 +182,10 @@ function buildRevenueSeries(orders: Order[], months: number = 6): AdminRevenuePo
 
 function buildStatusShare(orders: Order[]): StatusShareItem[] {
   const statusConfig: Record<OrderStatus, { label: string; color: string }> = {
-    [OrderStatus.COMPLETED]: { label: "Thành công", color: "#22c55e" },
-    [OrderStatus.PROCESSING]: { label: "Đang xử lý", color: "#f59e0b" },
-    [OrderStatus.PENDING]: { label: "Chờ xử lý", color: "#60a5fa" },
+    [OrderStatus.DELIVERED]: { label: "Đã giao", color: "#22c55e" },
+    [OrderStatus.SHIPPING]: { label: "Đang giao", color: "#f59e0b" },
+    [OrderStatus.CONFIRMED]: { label: "Đã xác nhận", color: "#3b82f6" },
+    [OrderStatus.PENDING]: { label: "Chờ xác nhận", color: "#fbbf24" },
     [OrderStatus.CANCELLED]: { label: "Đã hủy", color: "#ef4444" },
   };
 
@@ -194,8 +195,9 @@ function buildStatusShare(orders: Order[]): StatusShareItem[] {
       return acc;
     },
     {
-      [OrderStatus.COMPLETED]: 0,
-      [OrderStatus.PROCESSING]: 0,
+      [OrderStatus.DELIVERED]: 0,
+      [OrderStatus.SHIPPING]: 0,
+      [OrderStatus.CONFIRMED]: 0,
       [OrderStatus.PENDING]: 0,
       [OrderStatus.CANCELLED]: 0,
     }
@@ -203,8 +205,9 @@ function buildStatusShare(orders: Order[]): StatusShareItem[] {
 
   const total = Object.values(counts).reduce((sum, value) => sum + value, 0);
   const statuses: OrderStatus[] = [
-    OrderStatus.COMPLETED,
-    OrderStatus.PROCESSING,
+    OrderStatus.DELIVERED,
+    OrderStatus.SHIPPING,
+    OrderStatus.CONFIRMED,
     OrderStatus.PENDING,
     OrderStatus.CANCELLED,
   ];

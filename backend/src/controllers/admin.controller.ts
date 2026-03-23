@@ -1,11 +1,12 @@
 import { Request, Response, NextFunction } from "express";
-import { sendSuccess } from "../utils/response";
+import { sendSuccess, sendError } from "../utils/response";
 import { prisma } from "../config/db";
 import { ProductRepository } from "../repositories/product.repository";
 import { OrderRepository } from "../repositories/order.repository";
 import { UserRepository } from "../repositories/user.repository";
 import { CategoryRepository } from "../repositories/category.repository";
 import { DiscountRepository } from "../repositories/discount.repository";
+import { PaymentService } from "../services/payment.service";
 
 export class AdminController {
   static async getMetrics(_req: Request, res: Response, next: NextFunction) {
@@ -59,6 +60,75 @@ export class AdminController {
       const { status, paymentStatus } = req.body as { status?: string; paymentStatus?: string };
       const updated = await OrderRepository.updateById(req.params.id, { status, paymentStatus });
       return sendSuccess(res, updated, "Order updated successfully");
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async confirmOrder(req: Request<{ id: string }>, res: Response, next: NextFunction) {
+    try {
+      const order = await OrderRepository.findById(req.params.id);
+      if (!order) return sendError(res, "Khong tim thay don hang", null, 404);
+      if (order.status !== "PENDING") {
+        return sendError(res, "Don hang khong the xac nhan", null, 400);
+      }
+      const updated = await OrderRepository.updateById(req.params.id, { status: "CONFIRMED" });
+      return sendSuccess(res, updated, "Xac nhan don hang thanh cong");
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async shipOrder(req: Request<{ id: string }>, res: Response, next: NextFunction) {
+    try {
+      const order = await OrderRepository.findById(req.params.id);
+      if (!order) return sendError(res, "Khong tim thay don hang", null, 404);
+      if (order.status !== "CONFIRMED") {
+        return sendError(res, "Don hang khong the chuyen giao hang", null, 400);
+      }
+      const updated = await OrderRepository.updateById(req.params.id, { status: "SHIPPING" });
+      return sendSuccess(res, updated, "Chuyen don sang giao hang thanh cong");
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async cancelOrder(req: Request<{ id: string }>, res: Response, next: NextFunction) {
+    try {
+      const order = await OrderRepository.findById(req.params.id);
+      if (!order) return sendError(res, "Khong tim thay don hang", null, 404);
+
+      if (order.status === "SHIPPING" || order.status === "DELIVERED") {
+        return sendError(res, "Don hang khong the huy o trang thai hien tai", null, 400);
+      }
+
+      let paymentStatus = "FAILED";
+      if (order.paymentStatus === "PAID" && order.paymentMethod === "MOMO") {
+        await PaymentService.refundMoMoPayment(order);
+        paymentStatus = "REFUNDED";
+      }
+
+      const updated = await OrderRepository.updateById(req.params.id, {
+        status: "CANCELLED",
+        paymentStatus,
+      });
+      return sendSuccess(res, updated, "Huy don thanh cong");
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async refundOrder(req: Request<{ id: string }>, res: Response, next: NextFunction) {
+    try {
+      const order = await OrderRepository.findById(req.params.id);
+      if (!order) return sendError(res, "Khong tim thay don hang", null, 404);
+      if (order.paymentStatus !== "PAID" || order.paymentMethod !== "MOMO") {
+        return sendError(res, "Don hang khong the hoan tien", null, 400);
+      }
+
+      await PaymentService.refundMoMoPayment(order);
+      const updated = await OrderRepository.updateById(req.params.id, { paymentStatus: "REFUNDED" });
+      return sendSuccess(res, updated, "Hoan tien thanh cong");
     } catch (error) {
       next(error);
     }

@@ -12,6 +12,10 @@ export interface CreateOrderResult {
   paymentUrl: string | null;
 }
 
+export interface RetryPaymentResult {
+  paymentUrl: string | null;
+}
+
 export const orderService = {
   list(token?: string) {
     return apiRequest<{ data: Order[] }>("/orders", { token });
@@ -28,6 +32,22 @@ export const orderService = {
       headers: { "x-idempotency-key": idempotencyKey },
       token,
       body: JSON.stringify(payload)
+    });
+  },
+
+  createMoMoPayment(orderId: string, token?: string) {
+    return apiRequest<{ data: RetryPaymentResult }>("/payment/momo/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      token,
+      body: JSON.stringify({ orderId }),
+    });
+  },
+
+  cancelOrder(orderId: string, token?: string) {
+    return apiRequest<{ data: Order }>(`/orders/${orderId}/cancel`, {
+      method: "POST",
+      token,
     });
   }
 };

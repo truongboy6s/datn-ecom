@@ -18,7 +18,7 @@ export class ReviewService {
         productId,
         order: {
           userId,
-          status: OrderStatus.COMPLETED,
+          status: OrderStatus.DELIVERED,
         },
       },
     });
@@ -35,8 +35,8 @@ export class ReviewService {
     if (!eligibility.canReview) {
       const message =
         eligibility.reason === "ALREADY_REVIEWED"
-          ? "You already reviewed this product"
-          : "Order not completed for this product";
+          ? "Ban da danh gia san pham nay"
+          : "Don hang chua duoc giao cho san pham nay";
       throw new Error(message);
     }
 

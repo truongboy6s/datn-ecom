@@ -15,6 +15,10 @@ router.use(authenticate, authorize(["ADMIN"]));
 router.get("/metrics", AdminController.getMetrics);
 router.get("/orders", AdminController.listOrders);
 router.patch("/orders/:id", validate(updateOrderSchema), AdminController.updateOrder);
+router.post("/orders/:id/confirm", AdminController.confirmOrder);
+router.post("/orders/:id/ship", AdminController.shipOrder);
+router.post("/orders/:id/cancel", AdminController.cancelOrder);
+router.post("/orders/:id/refund", AdminController.refundOrder);
 
 router.get("/products", AdminController.listProducts);
 router.post("/products", validate(createProductSchema), AdminController.createProduct);

@@ -8,11 +8,11 @@ export class ReviewController {
     try {
       const productId = req.query.productId as string | undefined;
       if (!productId) {
-        return sendError(res, "productId is required", null, 400);
+        return sendError(res, "Thieu productId", null, 400);
       }
 
       const reviews = await ReviewService.listByProduct(productId);
-      return sendSuccess(res, reviews, "Reviews fetched successfully");
+      return sendSuccess(res, reviews, "Lay danh gia thanh cong");
     } catch (error) {
       next(error);
     }
@@ -22,11 +22,11 @@ export class ReviewController {
     try {
       const productId = req.query.productId as string | undefined;
       if (!productId) {
-        return sendError(res, "productId is required", null, 400);
+        return sendError(res, "Thieu productId", null, 400);
       }
 
       const eligibility = await ReviewService.canReview(req.user!.userId, productId);
-      return sendSuccess(res, eligibility, "Eligibility checked");
+      return sendSuccess(res, eligibility, "Kiem tra dieu kien thanh cong");
     } catch (error) {
       next(error);
     }
@@ -41,9 +41,9 @@ export class ReviewController {
       };
 
       const review = await ReviewService.create(req.user!.userId, productId, rating, comment);
-      return sendSuccess(res, review, "Review created", 201);
+      return sendSuccess(res, review, "Tao danh gia thanh cong", 201);
     } catch (error: any) {
-      if (error.message?.includes("reviewed") || error.message?.includes("completed")) {
+      if (error.message?.includes("danh gia") || error.message?.includes("giao")) {
         return sendError(res, error.message, null, 400);
       }
       next(error);

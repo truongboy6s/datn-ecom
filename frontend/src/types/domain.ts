@@ -43,8 +43,9 @@ export interface Order {
 
 export enum OrderStatus {
   PENDING = "PENDING",
-  PROCESSING = "PROCESSING",
-  COMPLETED = "COMPLETED",
+  CONFIRMED = "CONFIRMED",
+  SHIPPING = "SHIPPING",
+  DELIVERED = "DELIVERED",
   CANCELLED = "CANCELLED",
 }
 
@@ -52,12 +53,14 @@ export enum PaymentStatus {
   PENDING = "PENDING",
   PAID = "PAID",
   FAILED = "FAILED",
+  REFUNDED = "REFUNDED",
 }
 
 export const ORDER_STATUS_VIETNAMESE: Record<OrderStatus, string> = {
-  [OrderStatus.PENDING]: "Đang chờ",
-  [OrderStatus.PROCESSING]: "Đang xử lý",
-  [OrderStatus.COMPLETED]: "Hoàn thành",
+  [OrderStatus.PENDING]: "Chờ xác nhận",
+  [OrderStatus.CONFIRMED]: "Đã xác nhận",
+  [OrderStatus.SHIPPING]: "Đang giao",
+  [OrderStatus.DELIVERED]: "Đã giao",
   [OrderStatus.CANCELLED]: "Đã hủy",
 };
 
@@ -65,6 +68,7 @@ export const PAYMENT_STATUS_VIETNAMESE: Record<PaymentStatus, string> = {
   [PaymentStatus.PENDING]: "Chờ thanh toán",
   [PaymentStatus.PAID]: "Đã thanh toán",
   [PaymentStatus.FAILED]: "Thất bại",
+  [PaymentStatus.REFUNDED]: "Đã hoàn tiền",
 };
 
 export interface AppUser {

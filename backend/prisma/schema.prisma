@@ -102,8 +102,9 @@ enum Role {
 
 enum OrderStatus {
   PENDING
-  PROCESSING
-  COMPLETED
+  CONFIRMED
+  SHIPPING
+  DELIVERED
   CANCELLED
 }
 
@@ -117,6 +118,7 @@ enum PaymentStatus {
   PENDING
   PAID
   FAILED
+  REFUNDED
 }
 
 enum ChatRole {

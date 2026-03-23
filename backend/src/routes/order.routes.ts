@@ -16,5 +16,7 @@ router.post(
 );
 
 router.get("/", authenticate, OrderController.getUserOrders);
+router.post("/:id/pay", authenticate, OrderController.retryMoMoPayment);
+router.post("/:id/cancel", authenticate, OrderController.cancelOrder);
 
 export default router;

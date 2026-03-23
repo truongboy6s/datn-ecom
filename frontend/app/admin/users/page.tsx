@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Modal, ConfirmDialog } from "@/components/common/Modal";
-import type { AdminUserItem } from "@/data/store-mock";
+import type { AdminUserItem } from "@/types/admin";
 import { adminService } from "@/services/admin.service";
 
 function roleBadgeClass(role: string) {

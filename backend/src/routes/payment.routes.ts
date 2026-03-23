@@ -5,6 +5,7 @@ import { authenticate } from "../middlewares/auth";
 const router = Router();
 
 router.post("/momo/callback", PaymentController.momoWebhook);
+router.get("/momo/return", PaymentController.momoReturn);
 router.post("/momo/create", authenticate, PaymentController.momoCreate);
 router.get("/vnpay/callback", PaymentController.vnpayWebhook);
 

@@ -9,6 +9,7 @@ const envSchema = z.object({
   GMAIL_PASS: z.string().min(1),
   ADMIN_SECRET: z.string().min(1),
   NEXT_PUBLIC_BASE_URL: z.string().url().optional(),
+  BACKEND_BASE_URL: z.string().url().optional(),
   GEMINI_API_KEY: z.string().optional(),
   OPENAI_API_KEY: z.string().optional(),
   MOMO_PARTNER_CODE: z.string().optional(),

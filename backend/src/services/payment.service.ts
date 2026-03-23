@@ -11,15 +11,15 @@ export class PaymentService {
     const secretKey = env.MOMO_SECRET_KEY!;
     const endpoint = env.MOMO_ENDPOINT!;
 
-    const orderId = order.id;
+    const orderId = `${order.id}-${Date.now()}`;
     const orderInfo = `Pay for order ${order.id}`;
-    const amount = order.totalPrice.toString();
+    const amount = Math.round(order.totalPrice).toString();
     const frontendBaseUrl = env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-    const backendBaseUrl = `http://localhost:${env.PORT}`;
-    const redirectUrl = `${frontendBaseUrl}/orders`;
+    const backendBaseUrl = env.BACKEND_BASE_URL || `http://localhost:${env.PORT}`;
+    const redirectUrl = `${backendBaseUrl}/api/payment/momo/return`;
     const ipnUrl = `${backendBaseUrl}/api/payment/momo/callback`;
     const requestType = "captureWallet";
-    const extraData = "";
+    const extraData = Buffer.from(JSON.stringify({ orderId: order.id })).toString("base64");
     const requestId = orderId + new Date().getTime();
 
     const rawSignature = `accessKey=${accessKey}&amount=${amount}&extraData=${extraData}&ipnUrl=${ipnUrl}&orderId=${orderId}&orderInfo=${orderInfo}&partnerCode=${partnerCode}&redirectUrl=${redirectUrl}&requestId=${requestId}&requestType=${requestType}`;
@@ -52,15 +52,24 @@ export class PaymentService {
       body: JSON.stringify(requestBody),
     });
 
-    const responseBody = await response.json().catch(() => null);
+    const rawText = await response.text();
+    const responseBody = rawText ? (() => {
+      try {
+        return JSON.parse(rawText);
+      } catch {
+        return null;
+      }
+    })() : null;
+
     if (!response.ok) {
-      const message = responseBody?.message || "MoMo payment creation failed";
+      const message = responseBody?.message || rawText || "MoMo payment creation failed";
       throw new Error(message);
     }
 
     const payUrl = responseBody?.payUrl || responseBody?.deeplink || responseBody?.qrCodeUrl;
     if (!payUrl) {
-      throw new Error("MoMo response missing payUrl");
+      const detail = responseBody?.message || rawText || "unknown response";
+      throw new Error(`MoMo response missing payUrl: ${detail}`);
     }
 
     return payUrl;

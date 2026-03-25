@@ -4,7 +4,7 @@ import crypto from "crypto";
 import { UserRepository } from "../repositories/user.repository";
 import { env } from "../config/env";
 import { Prisma } from "@prisma/client";
-import { sendVerificationEmail } from "../config/mail";
+import { sendVerificationEmail, sendPasswordResetEmail } from "../config/mail";
 import { prisma } from "../lib/prisma";
 import { logger } from "../utils/logger";
 
@@ -141,5 +141,76 @@ export class AuthService {
     }
 
     return await UserRepository.updateById(userId, payload);
+  }
+
+  static async requestPasswordReset(email: string) {
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await UserRepository.findByEmail(normalizedEmail);
+
+    // Always respond success to avoid email enumeration
+    if (!user) {
+      return { message: "Nếu email tồn tại, liên kết đặt lại mật khẩu sẽ được gửi." };
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        resetPasswordToken: resetToken,
+        resetPasswordExpiresAt: expiresAt,
+      },
+    });
+
+    await sendPasswordResetEmail(normalizedEmail, resetToken);
+
+    return { message: "Neu email ton tai, lien ket dat lai mat khau se duoc gui." };
+  }
+
+  static async resetPassword(token: string, newPassword: string) {
+    const user = await prisma.user.findUnique({
+      where: { resetPasswordToken: token },
+    });
+
+    if (!user) {
+      throw new Error("Reset token khong hop le");
+    }
+
+    if (!user.resetPasswordExpiresAt || new Date() > user.resetPasswordExpiresAt) {
+      throw new Error("Reset token da het han");
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        resetPasswordToken: null,
+        resetPasswordExpiresAt: null,
+      },
+    });
+
+    return { message: "Đặt lại mật khẩu thành công" };
+  }
+
+  static async changePassword(userId: string, currentPassword: string, newPassword: string) {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const isValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isValid) {
+      throw new Error("Mật khẩu hiện tại không đúng");
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { password: hashedPassword },
+    });
+
+    return { message: "Đổi mật khẩu thành công" };
   }
 }

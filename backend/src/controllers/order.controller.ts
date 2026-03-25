@@ -19,7 +19,7 @@ export class OrderController {
         paymentUrl = await PaymentService.createVNPayPayment(order, req.ip || "127.0.0.1");
       }
 
-      return sendSuccess(res, { order, paymentUrl }, "Tao don hang thanh cong", 201);
+      return sendSuccess(res, { order, paymentUrl }, "Tạo đơn hàng thành công", 201);
     } catch (error: any) {
       if (
         error.message.includes("out of stock") ||
@@ -35,7 +35,7 @@ export class OrderController {
   static async getUserOrders(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const orders = await OrderService.getUserOrders(req.user!.userId);
-      return sendSuccess(res, orders, "Lay danh sach don hang thanh cong");
+      return sendSuccess(res, orders, "Lấy danh sách đơn hàng thành công");
     } catch (error) {
       next(error);
     }
@@ -55,15 +55,15 @@ export class OrderController {
       }
 
       if (order.paymentMethod !== "MOMO") {
-        return sendError(res, "Don hang khong ho tro thanh toan lai", null, 400);
+        return sendError(res, "Đơn hàng không hỗ trợ thanh toán lại", null, 400);
       }
 
       if (order.paymentStatus !== "FAILED" || order.status !== "PENDING") {
-        return sendError(res, "Don hang khong o trang thai thanh toan lai", null, 400);
+        return sendError(res, "Đơn hàng không ở trạng thái thanh toán lại", null, 400);
       }
 
       const paymentUrl = await PaymentService.createMoMoPayment(order);
-      return sendSuccess(res, { paymentUrl }, "Tao lai thanh toan thanh cong");
+      return sendSuccess(res, { paymentUrl }, "Tạo lại đơn hàng thành công");
     } catch (error) {
       next(error);
     }
@@ -83,7 +83,7 @@ export class OrderController {
       }
 
       if (order.status !== "PENDING") {
-        return sendError(res, "Don hang khong the huy o trang thai hien tai", null, 400);
+        return sendError(res, "Đơn hàng không thể hủy ở trạng thái hiện tại", null, 400);
       }
 
       if (order.paymentStatus === "PAID" && order.paymentMethod === "MOMO") {
@@ -92,14 +92,14 @@ export class OrderController {
           status: "CANCELLED",
           paymentStatus: "REFUNDED",
         });
-        return sendSuccess(res, updated, "Huy don va hoan tien thanh cong");
+        return sendSuccess(res, updated, "Hủy đơn và hoàn tiền thành công");
       }
 
       const updated = await OrderService.updateOrder(orderId, {
         status: "CANCELLED",
         paymentStatus: "FAILED",
       });
-      return sendSuccess(res, updated, "Huy don thanh cong");
+      return sendSuccess(res, updated, "Hủy đơn thành công");
     } catch (error) {
       next(error);
     }

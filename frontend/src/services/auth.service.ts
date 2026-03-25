@@ -20,6 +20,20 @@ export interface UpdateProfilePayload {
   avatarUrl?: string | null;
 }
 
+export interface ForgotPasswordPayload {
+  email: string;
+}
+
+export interface ResetPasswordPayload {
+  token: string;
+  password: string;
+}
+
+export interface ChangePasswordPayload {
+  currentPassword: string;
+  newPassword: string;
+}
+
 export const authService = {
   async register(payload: RegisterPayload) {
     const res = await apiClient("/auth/register", {
@@ -40,5 +54,26 @@ export const authService = {
   async updateProfile(payload: UpdateProfilePayload) {
     const res = await axiosClient.patch("/auth/me", payload);
     return res.data.data as { user: AppUser };
+  },
+
+  async forgotPassword(payload: ForgotPasswordPayload) {
+    const res = await apiClient("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+    return res.data;
+  },
+
+  async resetPassword(payload: ResetPasswordPayload) {
+    const res = await apiClient("/auth/reset-password", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+    return res.data;
+  },
+
+  async changePassword(payload: ChangePasswordPayload) {
+    const res = await axiosClient.patch("/auth/change-password", payload);
+    return res.data;
   }
 };

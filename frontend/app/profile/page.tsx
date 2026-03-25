@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuthContext } from "@/context/AuthContext";
+import { authService } from "@/services/auth.service";
 
 export default function ProfilePage() {
   const { user, logout, isHydrated, updateProfile } = useAuthContext();
@@ -14,6 +15,11 @@ export default function ProfilePage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
 
   // Redirect if not logged in
   useEffect(() => {
@@ -86,6 +92,27 @@ export default function ProfilePage() {
     }
   };
 
+  const handleChangePassword = async () => {
+    if (newPassword !== confirmPassword) {
+      setError("Mật khẩu mới không khớp!");
+      return;
+    }
+    try {
+      setError("");
+      setMessage("");
+      setChangingPassword(true);
+      await authService.changePassword({ currentPassword, newPassword });
+      setMessage("Đổi mật khẩu thành công!");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err: any) {
+      setError(err.message || "Lỗi đổi mật khẩu.");
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
   if (!isHydrated) {
     return (
       <main className="container page">
@@ -110,12 +137,14 @@ export default function ProfilePage() {
         <h1 style={{ marginBottom: "30px" }}>Thông tin người dùng</h1>
 
         {/* Profile Card */}
-        <div style={{
-          background: "white",
-          border: "1px solid var(--line)",
-          borderRadius: "var(--radius)",
-          padding: "30px",
-        }}>
+        <div
+          style={{
+            background: "white",
+            border: "1px solid var(--line)",
+            borderRadius: "var(--radius)",
+            padding: "30px",
+          }}
+        >
           {/* Avatar Section */}
           <div style={{ textAlign: "center", marginBottom: "40px" }}>
             <div
@@ -144,17 +173,19 @@ export default function ProfilePage() {
             </div>
 
             {isEditing && (
-              <label style={{
-                display: "inline-block",
-                padding: "10px 20px",
-                background: "var(--brand)",
-                color: "white",
-                borderRadius: "var(--radius)",
-                cursor: "pointer",
-                fontSize: ".9rem",
-                fontWeight: "500",
-                marginTop: "10px",
-              }}>
+              <label
+                style={{
+                  display: "inline-block",
+                  padding: "10px 20px",
+                  background: "var(--brand)",
+                  color: "white",
+                  borderRadius: "var(--radius)",
+                  cursor: "pointer",
+                  fontSize: ".9rem",
+                  fontWeight: "500",
+                  marginTop: "10px",
+                }}
+              >
                 📸 Đổi Avatar
                 <input
                   type="file"
@@ -168,11 +199,13 @@ export default function ProfilePage() {
           </div>
 
           {/* Info Section */}
-          <div style={{
-            display: "grid",
-            gap: "20px",
-            marginBottom: "30px",
-          }}>
+          <div
+            style={{
+              display: "grid",
+              gap: "20px",
+              marginBottom: "30px",
+            }}
+          >
             {/* Name Field */}
             <div>
               <label style={{ display: "block", marginBottom: "8px", fontWeight: "600", fontSize: ".95rem" }}>
@@ -194,7 +227,15 @@ export default function ProfilePage() {
                   minLength={2}
                 />
               ) : (
-                <p style={{ margin: 0, color: "var(--text)", padding: "10px 12px", background: "var(--bg-soft)", borderRadius: "var(--radius)" }}>
+                <p
+                  style={{
+                    margin: 0,
+                    color: "var(--text)",
+                    padding: "10px 12px",
+                    background: "var(--bg-soft)",
+                    borderRadius: "var(--radius)",
+                  }}
+                >
                   {user.name}
                 </p>
               )}
@@ -205,7 +246,15 @@ export default function ProfilePage() {
               <label style={{ display: "block", marginBottom: "8px", fontWeight: "600", fontSize: ".95rem" }}>
                 Email
               </label>
-              <p style={{ margin: 0, color: "var(--muted)", padding: "10px 12px", background: "var(--bg-soft)", borderRadius: "var(--radius)" }}>
+              <p
+                style={{
+                  margin: 0,
+                  color: "var(--muted)",
+                  padding: "10px 12px",
+                  background: "var(--bg-soft)",
+                  borderRadius: "var(--radius)",
+                }}
+              >
                 {user.email}
               </p>
             </div>
@@ -215,7 +264,15 @@ export default function ProfilePage() {
               <label style={{ display: "block", marginBottom: "8px", fontWeight: "600", fontSize: ".95rem" }}>
                 Vai trò
               </label>
-              <p style={{ margin: 0, color: "var(--muted)", padding: "10px 12px", background: "var(--bg-soft)", borderRadius: "var(--radius)" }}>
+              <p
+                style={{
+                  margin: 0,
+                  color: "var(--muted)",
+                  padding: "10px 12px",
+                  background: "var(--bg-soft)",
+                  borderRadius: "var(--radius)",
+                }}
+              >
                 {user.role === "ADMIN" ? "Quản trị viên" : "Khách hàng"}
               </p>
             </div>
@@ -265,6 +322,135 @@ export default function ProfilePage() {
               </button>
             )}
           </div>
+        </div>
+
+        {/* Change Password */}
+        <div
+          style={{
+            background: "white",
+            border: "1px solid var(--line)",
+            borderRadius: "var(--radius)",
+            padding: "30px",
+            marginTop: "20px",
+          }}
+        >
+          <button
+            onClick={() => setShowChangePassword(!showChangePassword)}
+            style={{
+              width: "100%",
+              background: "none",
+              border: "none",
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              cursor: "pointer",
+              fontSize: "1.1rem",
+              fontWeight: "600",
+              color: "var(--text)",
+              padding: 0,
+              margin: 0,
+            }}
+          >
+            <span style={{ fontSize: "1.3rem" }}>
+              {showChangePassword ? "▼" : "▶"}
+            </span>
+            <span>Đổi mật khẩu</span>
+          </button>
+
+          {showChangePassword && (
+            <div style={{ display: "grid", gap: "16px", marginTop: "20px", paddingTop: "20px", borderTop: "1px solid var(--line)" }}>
+              <label style={{ display: "grid", gap: "8px" }}>
+                <span style={{ fontWeight: "600", fontSize: ".95rem" }}>Mật khẩu hiện tại</span>
+                <input
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  placeholder="Nhập mật khẩu hiện tại"
+                  style={{
+                    padding: "10px 12px",
+                    border: "1px solid var(--line)",
+                    borderRadius: "var(--radius)",
+                    fontSize: ".9rem",
+                    boxSizing: "border-box",
+                  }}
+                />
+              </label>
+              <label style={{ display: "grid", gap: "8px" }}>
+                <span style={{ fontWeight: "600", fontSize: ".95rem" }}>Mật khẩu mới</span>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Nhập mật khẩu mới"
+                  style={{
+                    padding: "10px 12px",
+                    border: "1px solid var(--line)",
+                    borderRadius: "var(--radius)",
+                    fontSize: ".9rem",
+                    boxSizing: "border-box",
+                  }}
+                />
+              </label>
+              <label style={{ display: "grid", gap: "8px" }}>
+                <span style={{ fontWeight: "600", fontSize: ".95rem" }}>Nhập lại mật khẩu mới</span>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Nhập lại mật khẩu mới"
+                  style={{
+                    padding: "10px 12px",
+                    border: newPassword && confirmPassword && newPassword !== confirmPassword ? "2px solid #ef4444" : "1px solid var(--line)",
+                    borderRadius: "var(--radius)",
+                    fontSize: ".9rem",
+                    boxSizing: "border-box",
+                  }}
+                />
+                {newPassword && confirmPassword && newPassword !== confirmPassword && (
+                  <p style={{ color: "#ef4444", margin: "4px 0 0 0", fontSize: ".85rem" }}>❌ Mật khẩu không khớp</p>
+                )}
+              </label>
+
+              {error && (
+                <p style={{ color: "#ef4444", margin: 0, fontSize: ".9rem" }}>❌ {error}</p>
+              )}
+              {message && (
+                <p style={{ color: "#22c55e", margin: 0, fontSize: ".9rem" }}>✅ {message}</p>
+              )}
+
+              <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end", marginTop: "10px" }}>
+                <button
+                  onClick={() => {
+                    setShowChangePassword(false);
+                    setCurrentPassword("");
+                    setNewPassword("");
+                    setConfirmPassword("");
+                    setError("");
+                    setMessage("");
+                  }}
+                  style={{
+                    padding: "10px 20px",
+                    background: "transparent",
+                    border: "1px solid var(--line)",
+                    borderRadius: "var(--radius)",
+                    cursor: "pointer",
+                    fontSize: ".9rem",
+                    fontWeight: "500",
+                  }}
+                >
+                  Hủy
+                </button>
+                <button
+                  className="btn-primary"
+                  onClick={handleChangePassword}
+                  disabled={changingPassword || !currentPassword || !newPassword || !confirmPassword || newPassword !== confirmPassword}
+                  style={{ padding: "10px 20px" }}
+                >
+                  {changingPassword ? "Đang đổi..." : "Đổi mật khẩu"}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Logout Button */}

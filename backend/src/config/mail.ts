@@ -49,4 +49,39 @@ export async function sendVerificationEmail(email: string, token: string) {
   }
 }
 
+export async function sendPasswordResetEmail(email: string, token: string) {
+  const resetLink = `${env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/reset-password?token=${token}`;
+
+  if (!transporter) {
+    logger.warn("Password reset skipped: GMAIL_USER/GMAIL_PASS is not configured.");
+    return false;
+  }
+
+  try {
+    await transporter.sendMail({
+      from: env.GMAIL_USER,
+      to: email,
+      subject: "Đặt lại mật khẩu - DATN Ecom",
+      html: `
+        <h2>Đặt lại mật khẩu</h2>
+        <p>Chúng tôi nhận được yêu cầu đặt lại mật khẩu.</p>
+        <p>Vui lòng nhấp vào liên kết bên dưới để tạo mật khẩu mới:</p>
+        <a href="${resetLink}" style="display: inline-block; padding: 10px 20px; background-color: #ff6b35; color: white; text-decoration: none; border-radius: 5px;">
+          Đặt lại mật khẩu
+        </a>
+        <p>Hoac copy link nay: ${resetLink}</p>
+        <p>Link nay se het han sau 1 gio.</p>
+      `,
+    });
+    return true;
+  } catch (error) {
+    logger.warn("Unable to send password reset email", {
+      email,
+      errorCode: (error as any)?.code,
+      responseCode: (error as any)?.responseCode,
+    });
+    return false;
+  }
+}
+
 export default transporter;

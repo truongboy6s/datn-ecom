@@ -112,6 +112,9 @@ export default function RegisterPage() {
           Đã có tài khoản?{" "}
           <Link href="/login" style={{ color: "var(--brand)", fontWeight: 600 }}>Đăng nhập</Link>
         </p>
+        <p style={{ color: "var(--muted)", fontSize: ".9rem" }}>
+          <Link href="/forgot-password" style={{ color: "var(--brand)", fontWeight: 600 }}>Quên mật khẩu?</Link>
+        </p>
       </section>
     </main>
   );

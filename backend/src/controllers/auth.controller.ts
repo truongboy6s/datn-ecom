@@ -78,4 +78,44 @@ export class AuthController {
       next(error);
     }
   }
+
+  static async forgotPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email } = req.body as { email: string };
+      const result = await AuthService.requestPasswordReset(email);
+      return sendSuccess(res, result, "Yêu cầu đặt lại mật khẩu đã được gửi");
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async resetPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { token, password } = req.body as { token: string; password: string };
+      const result = await AuthService.resetPassword(token, password);
+      return sendSuccess(res, result, "Đặt lại mật khẩu thành công");
+    } catch (error: any) {
+      if (error.message?.includes("token")) {
+        return sendError(res, error.message, null, 400);
+      }
+      next(error);
+    }
+  }
+
+  static async changePassword(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) {
+        return sendError(res, "Unauthorized", null, 401);
+      }
+      const { currentPassword, newPassword } = req.body as { currentPassword: string; newPassword: string };
+      const result = await AuthService.changePassword(userId, currentPassword, newPassword);
+      return sendSuccess(res, result, "Đổi mật khẩu thành công");
+    } catch (error: any) {
+      if (error.message?.includes("Mật khẩu")) {
+        return sendError(res, error.message, null, 400);
+      }
+      next(error);
+    }
+  }
 }

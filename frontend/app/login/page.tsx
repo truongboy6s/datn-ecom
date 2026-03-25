@@ -69,6 +69,9 @@ export default function LoginPage() {
         </form>
         {error ? <p className="error-text">{error}</p> : null}
         {message ? <p className="success-text">{message}</p> : null}
+        <p style={{ color: "var(--muted)", fontSize: ".9rem", marginTop: 8 }}>
+          <Link href="/forgot-password" style={{ color: "var(--brand)", fontWeight: 600 }}>Quên mật khẩu?</Link>
+        </p>
         <p style={{ color: "var(--muted)", fontSize: ".9rem" }}>
           Chưa có tài khoản?{" "}
           <Link href="/register" style={{ color: "var(--brand)", fontWeight: 600 }}>Đăng ký ngay</Link>

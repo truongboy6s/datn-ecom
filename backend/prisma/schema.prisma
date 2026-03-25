@@ -17,6 +17,8 @@ model User {
   emailVerified              Boolean       @default(false)
   emailVerificationToken     String?       @unique
   emailVerificationExpiresAt DateTime?
+  resetPasswordToken         String?       @unique
+  resetPasswordExpiresAt     DateTime?
   orders                     Order[]
   reviews                    Review[]
   chats                      ChatMessage[]

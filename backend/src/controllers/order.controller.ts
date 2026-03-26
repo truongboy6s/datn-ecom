@@ -74,12 +74,12 @@ export class OrderController {
       const rawId = req.params.id;
       const orderId = Array.isArray(rawId) ? rawId[0] : rawId;
       if (!orderId) {
-        return sendError(res, "Thieu ma don hang", null, 400);
+        return sendError(res, "Thiếu mã đơn hàng", null, 400);
       }
 
       const order = await OrderService.getOrderById(orderId);
       if (!order || order.userId !== req.user!.userId) {
-        return sendError(res, "Khong tim thay don hang", null, 404);
+        return sendError(res, "Không tìm thấy đơn hàng", null, 404);
       }
 
       if (order.status !== "PENDING") {

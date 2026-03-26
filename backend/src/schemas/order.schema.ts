@@ -7,7 +7,7 @@ export const createOrderSchema = z.object({
         productId: z.string().uuid(),
         quantity: z.number().int().positive(),
       })
-    ).min(1, "Don hang phai co it nhat mot san pham"),
+    ).min(1, "Đơn hàng phải có ít nhất một sản phẩm"),
     paymentMethod: z.enum(["COD", "MOMO", "VNPAY"]),
     discountCode: z.string().min(2).optional(),
   }),

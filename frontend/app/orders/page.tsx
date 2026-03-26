@@ -181,6 +181,24 @@ export default function OrdersPage() {
                         Thanh toán lại
                       </button>
                     ) : null}
+                    {(order.paymentStatus === "FAILED" || order.paymentStatus === "PENDING") && order.paymentMethod === "VNPAY" ? (
+                      <button
+                        className="btn-sm"
+                        onClick={async () => {
+                          try {
+                            const res = await orderService.createVNPayPayment(order.id);
+                            const paymentUrl = res?.data?.paymentUrl;
+                            if (paymentUrl) {
+                              window.location.href = paymentUrl;
+                            }
+                          } catch (err: any) {
+                            setError(err.message || "Khong the tao lai thanh toan.");
+                          }
+                        }}
+                      >
+                        Thanh toán lại
+                      </button>
+                    ) : null}
                     <button
                       className="btn-sm btn-outline"
                       onClick={async () => {

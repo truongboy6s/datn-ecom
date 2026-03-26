@@ -165,7 +165,7 @@ export class AuthService {
 
     await sendPasswordResetEmail(normalizedEmail, resetToken);
 
-    return { message: "Neu email ton tai, lien ket dat lai mat khau se duoc gui." };
+    return { message: "Nếu email tồn tại, liên kết đặt lại mật khẩu sẽ được gửi." };
   }
 
   static async resetPassword(token: string, newPassword: string) {
@@ -174,11 +174,11 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new Error("Reset token khong hop le");
+      throw new Error("Reset token không hợp lệ");
     }
 
     if (!user.resetPasswordExpiresAt || new Date() > user.resetPasswordExpiresAt) {
-      throw new Error("Reset token da het han");
+      throw new Error("Reset token đã hết hạn");
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);

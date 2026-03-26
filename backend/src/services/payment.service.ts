@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import { env } from "../config/env";
 import { Order } from "@prisma/client";
+import qs from "qs";
 
 export class PaymentService {
   static async createMoMoPayment(order: Order) {
@@ -104,18 +105,119 @@ export class PaymentService {
   }
 
   static async createVNPayPayment(order: Order, ipAddr: string) {
-    // Generate VNPay URL mockup based on their docs
-    return `https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?vnp_Amount=${order.totalPrice * 100}&vnp_TxnRef=${order.id}`;
+    const vnpTmnCode = env.VNP_TMNCODE;
+    const vnpHashSecret = env.VNP_HASH_SECRET;
+    const vnpUrl = env.VNP_URL || "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
+
+    if (!vnpTmnCode || !vnpHashSecret) {
+      return vnpUrl;
+    }
+
+    const shortOrderSuffix = order.id.replace(/[^a-zA-Z0-9]/g, "").slice(-6);
+    const vnpTxnRef = `ORD${Date.now()}${shortOrderSuffix}`;
+    const amount = Math.round(order.totalPrice * 100);
+    const backendBaseUrl = env.BACKEND_BASE_URL || `http://localhost:${env.PORT}`;
+    const returnUrl = `${backendBaseUrl}/api/payment/vnpay/return`;
+    const createDate = new Date();
+    const vnpCreateDate = `${createDate.getFullYear()}${(createDate.getMonth() + 1)
+      .toString()
+      .padStart(2, "0")}${createDate.getDate().toString().padStart(2, "0")}${createDate
+      .getHours()
+      .toString()
+      .padStart(2, "0")}${createDate.getMinutes().toString().padStart(2, "0")}${createDate
+      .getSeconds()
+      .toString()
+      .padStart(2, "0")}`;
+
+    const normalizedIp = ipAddr?.startsWith("::ffff:")
+      ? ipAddr.replace("::ffff:", "")
+      : ipAddr === "::1"
+        ? "127.0.0.1"
+        : ipAddr || "127.0.0.1";
+
+    const vnpParams: Record<string, string> = {
+      vnp_Version: "2.1.0",
+      vnp_Command: "pay",
+      vnp_TmnCode: vnpTmnCode,
+      vnp_Amount: amount.toString(),
+      vnp_CurrCode: "VND",
+      vnp_TxnRef: vnpTxnRef,
+      vnp_OrderInfo: order.id,
+      vnp_OrderType: "other",
+      vnp_Locale: "vn",
+      vnp_ReturnUrl: returnUrl,
+      vnp_IpAddr: normalizedIp,
+      vnp_CreateDate: vnpCreateDate,
+      vnp_ExpireDate: "",
+      vnp_BankCode: "",
+    };
+
+    const filteredParams = Object.entries(vnpParams).reduce<Record<string, string>>((acc, [key, value]) => {
+      if (value) acc[key] = value;
+      return acc;
+    }, {});
+
+    // Temporary log to diagnose VNPay parameter formatting (remove after debugging).
+    console.log("[VNPay] Params", filteredParams);
+
+    const sortedParams = Object.keys(filteredParams)
+      .sort()
+      .reduce<Record<string, string>>((acc, key) => {
+        acc[key] = filteredParams[key];
+        return acc;
+      }, {});
+
+    const signData = qs.stringify(sortedParams, {
+      encode: true,
+      encoder: (value) => encodeURIComponent(value).replace(/%20/g, "+"),
+    });
+
+    const secureHash = crypto
+      .createHmac("sha512", vnpHashSecret)
+      .update(signData, "utf-8")
+      .digest("hex");
+
+    const query = qs.stringify(
+      { ...sortedParams, vnp_SecureHash: secureHash },
+      {
+        encode: true,
+        encoder: (value) => encodeURIComponent(value).replace(/%20/g, "+"),
+      }
+    );
+    const paymentUrl = `${vnpUrl}?${query}`;
+    console.log("[VNPay] URL", paymentUrl);
+    return paymentUrl;
   }
 
   static verifyVNPaySignature(vnp_Params: any) {
     const secureHash = vnp_Params["vnp_SecureHash"];
+    const vnpHashSecret = env.VNP_HASH_SECRET || "";
+
     delete vnp_Params["vnp_SecureHash"];
     delete vnp_Params["vnp_SecureHashType"];
 
-    // Sort params and create hash string
-    // Simplified for mockup
-    return true; // Assume validation passes for dev
+    const sortedParams = Object.keys(vnp_Params)
+      .sort()
+      .reduce<Record<string, string>>((acc, key) => {
+       acc[key] = vnp_Params[key];
+        return acc;
+      }, {});
+
+    const signData = qs.stringify(sortedParams, {
+      encode: true,
+      encoder: (value) => encodeURIComponent(value).replace(/%20/g, "+"),
+    });
+
+    const checkSignature = crypto
+      .createHmac("sha512", vnpHashSecret)
+      .update(signData, "utf-8")
+      .digest("hex");
+
+    console.log("SIGN DATA:", signData);
+    console.log("VNPay HASH:", secureHash);
+    console.log("LOCAL HASH:", checkSignature);
+
+    return secureHash === checkSignature;
   }
 
   static async refundMoMoPayment(order: Order) {

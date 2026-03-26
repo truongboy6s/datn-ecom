@@ -12,7 +12,7 @@ export class ReviewController {
       }
 
       const reviews = await ReviewService.listByProduct(productId);
-      return sendSuccess(res, reviews, "Lay danh gia thanh cong");
+      return sendSuccess(res, reviews, "Lấy danh sách đánh giá thành công");
     } catch (error) {
       next(error);
     }
@@ -22,11 +22,11 @@ export class ReviewController {
     try {
       const productId = req.query.productId as string | undefined;
       if (!productId) {
-        return sendError(res, "Thieu productId", null, 400);
+        return sendError(res, "Thiếu productId", null, 400);
       }
 
       const eligibility = await ReviewService.canReview(req.user!.userId, productId);
-      return sendSuccess(res, eligibility, "Kiem tra dieu kien thanh cong");
+      return sendSuccess(res, eligibility, "Kiểm tra điều kiện thành công");
     } catch (error) {
       next(error);
     }
@@ -41,9 +41,9 @@ export class ReviewController {
       };
 
       const review = await ReviewService.create(req.user!.userId, productId, rating, comment);
-      return sendSuccess(res, review, "Tao danh gia thanh cong", 201);
+      return sendSuccess(res, review, "Tạo đánh giá thành công", 201);
     } catch (error: any) {
-      if (error.message?.includes("danh gia") || error.message?.includes("giao")) {
+      if (error.message?.includes("Đánh giá") || error.message?.includes("giao")) {
         return sendError(res, error.message, null, 400);
       }
       next(error);

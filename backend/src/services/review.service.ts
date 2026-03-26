@@ -35,8 +35,8 @@ export class ReviewService {
     if (!eligibility.canReview) {
       const message =
         eligibility.reason === "ALREADY_REVIEWED"
-          ? "Ban da danh gia san pham nay"
-          : "Don hang chua duoc giao cho san pham nay";
+          ? "Bạn đã đánh giá sản phẩm này"
+          : "Đơn hàng chưa được giao cho sản phẩm này";
       throw new Error(message);
     }
 

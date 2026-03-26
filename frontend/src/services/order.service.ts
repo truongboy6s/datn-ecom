@@ -44,6 +44,15 @@ export const orderService = {
     });
   },
 
+  createVNPayPayment(orderId: string, token?: string) {
+    return apiRequest<{ data: RetryPaymentResult }>("/payment/vnpay/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      token,
+      body: JSON.stringify({ orderId }),
+    });
+  },
+
   cancelOrder(orderId: string, token?: string) {
     return apiRequest<{ data: Order }>(`/orders/${orderId}/cancel`, {
       method: "POST",

@@ -2,9 +2,14 @@ import { apiRequest } from "@/services/api-client";
 import type { Category, Discount, Order, Product } from "@/types/domain";
 
 export interface DashboardMetrics {
-  revenue: number;
+  revenueToday: number;
+  revenueYesterday: number;
   totalOrders: number;
+  ordersToday: number;
+  ordersYesterday: number;
   totalUsers: number;
+  usersToday: number;
+  usersYesterday: number;
   topProduct?: string;
 }
 
@@ -16,9 +21,14 @@ export const adminService = {
   async getMetrics(token?: string) {
     const res = await apiRequest<{ data: DashboardMetrics }>("/admin/metrics", { token });
     return res.data ?? {
-      revenue: 0,
+      revenueToday: 0,
+      revenueYesterday: 0,
       totalOrders: 0,
+      ordersToday: 0,
+      ordersYesterday: 0,
       totalUsers: 0,
+      usersToday: 0,
+      usersYesterday: 0,
       topProduct: ""
     };
   },

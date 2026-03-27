@@ -7,17 +7,39 @@ import { UserRepository } from "../repositories/user.repository";
 import { CategoryRepository } from "../repositories/category.repository";
 import { DiscountRepository } from "../repositories/discount.repository";
 import { PaymentService } from "../services/payment.service";
+import { OrderService } from "../services/order.service";
 
 export class AdminController {
   static async getMetrics(_req: Request, res: Response, next: NextFunction) {
     try {
-      const [orderAgg, totalUsers] = await Promise.all([
-        prisma.order.aggregate({
-          _sum: { totalPrice: true },
-          _count: { id: true },
+      const startOfToday = new Date();
+      startOfToday.setHours(0, 0, 0, 0);
+
+      const startOfYesterday = new Date(startOfToday);
+      startOfYesterday.setDate(startOfToday.getDate() - 1);
+
+      const [ordersToday, ordersYesterday, totalUsers, totalOrders, usersToday, usersYesterday] = await Promise.all([
+        prisma.order.findMany({
+          where: { createdAt: { gte: startOfToday } },
+          select: { id: true, totalPrice: true, paymentStatus: true, status: true }
+        }),
+        prisma.order.findMany({
+          where: { createdAt: { gte: startOfYesterday, lt: startOfToday } },
+          select: { id: true, totalPrice: true, paymentStatus: true, status: true }
         }),
         prisma.user.count(),
+        prisma.order.count(),
+        prisma.user.count({ where: { createdAt: { gte: startOfToday } } }),
+        prisma.user.count({ where: { createdAt: { gte: startOfYesterday, lt: startOfToday } } }),
       ]);
+
+      const revenueToday = ordersToday
+        .filter(o => o.paymentStatus === "PAID" && o.status !== "CANCELLED")
+        .reduce((sum, o) => sum + o.totalPrice, 0);
+        
+      const revenueYesterday = ordersYesterday
+        .filter(o => o.paymentStatus === "PAID" && o.status !== "CANCELLED")
+        .reduce((sum, o) => sum + o.totalPrice, 0);
 
       const topItem = await prisma.orderItem.groupBy({
         by: ["productId"],
@@ -36,9 +58,14 @@ export class AdminController {
       }
 
       return sendSuccess(res, {
-        revenue: orderAgg._sum.totalPrice || 0,
-        totalOrders: orderAgg._count.id || 0,
+        revenueToday,
+        revenueYesterday,
+        totalOrders,
+        ordersToday: ordersToday.length,
+        ordersYesterday: ordersYesterday.length,
         totalUsers,
+        usersToday,
+        usersYesterday,
         topProduct,
       }, "Admin metrics fetched successfully");
     } catch (error) {
@@ -108,10 +135,7 @@ export class AdminController {
         paymentStatus = "REFUNDED";
       }
 
-      const updated = await OrderRepository.updateById(req.params.id, {
-        status: "CANCELLED",
-        paymentStatus,
-      });
+      const updated = await OrderService.cancelOrderAndRestoreStock(req.params.id, paymentStatus);
       return sendSuccess(res, updated, "Huy don thanh cong");
     } catch (error) {
       next(error);

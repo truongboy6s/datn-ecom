@@ -10,7 +10,17 @@ import type { AdminRevenuePoint, StatusShareItem } from "@/types/admin";
 import { OrderStatus, type Order, ORDER_STATUS_VIETNAMESE, PAYMENT_STATUS_VIETNAMESE } from "@/types/domain";
 
 export default function AdminDashboardPage() {
-  const [metrics, setMetrics] = useState({ revenue: 0, totalOrders: 0, totalUsers: 0, topProduct: "" });
+  const [metrics, setMetrics] = useState({
+    revenueToday: 0,
+    revenueYesterday: 0,
+    totalOrders: 0,
+    ordersToday: 0,
+    ordersYesterday: 0,
+    totalUsers: 0,
+    usersToday: 0,
+    usersYesterday: 0,
+    topProduct: "",
+  });
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [revenueSeries, setRevenueSeries] = useState<AdminRevenuePoint[]>([]);
@@ -25,7 +35,17 @@ export default function AdminDashboardPage() {
         if (!active) return;
         const safeMetrics = metricsRes
           ? { ...metricsRes, topProduct: metricsRes.topProduct || "" }
-          : { revenue: 0, totalOrders: 0, totalUsers: 0, topProduct: "" };
+          : {
+              revenueToday: 0,
+              revenueYesterday: 0,
+              totalOrders: 0,
+              ordersToday: 0,
+              ordersYesterday: 0,
+              totalUsers: 0,
+              usersToday: 0,
+              usersYesterday: 0,
+              topProduct: "",
+            };
         setMetrics(safeMetrics);
         const safeOrders = ordersRes || [];
         setOrders(safeOrders);
@@ -49,6 +69,22 @@ export default function AdminDashboardPage() {
 
   const latestOrders = orders.slice(0, 3);
 
+  const calcTrend = (today: number, yesterday: number) => {
+    if (yesterday === 0) return today > 0 ? "+100% vs hôm qua" : "0% vs hôm qua";
+    const diff = ((today - yesterday) / yesterday) * 100;
+    const prefix = diff > 0 ? "+" : "";
+    return `${prefix}${diff.toFixed(1)}% vs hôm qua`;
+  };
+
+  const revenueTrend = calcTrend(metrics.revenueToday, metrics.revenueYesterday);
+  const revenueDir = metrics.revenueToday >= metrics.revenueYesterday ? "up" : "down";
+
+  const ordersTrend = calcTrend(metrics.ordersToday, metrics.ordersYesterday);
+  const ordersDir = metrics.ordersToday >= metrics.ordersYesterday ? "up" : "down";
+
+  const usersTrend = `+${metrics.usersToday} user hôm nay`;
+  const usersDir = metrics.usersToday >= metrics.usersYesterday ? "up" : "down";
+
   return (
     <>
       <h1>📊 Dashboard</h1>
@@ -56,13 +92,13 @@ export default function AdminDashboardPage() {
 
       <div className="stat-grid">
         <StatCard
-          label="Doanh thu tháng"
-          value={metrics.revenue.toLocaleString("vi-VN") + "₫"}
+          label="Doanh thu ngày"
+          value={metrics.revenueToday.toLocaleString("vi-VN") + " VNĐ"}
           icon="💰"
           iconBg="#fff7ed"
           iconColor="#f97316"
-          trend="+12% vs tháng trước"
-          trendDirection="up"
+          trend={revenueTrend}
+          trendDirection={revenueDir}
         />
         <StatCard
           label="Tổng đơn hàng"
@@ -70,8 +106,8 @@ export default function AdminDashboardPage() {
           icon="📦"
           iconBg="#eff6ff"
           iconColor="#3b82f6"
-          trend="+8% vs tháng trước"
-          trendDirection="up"
+          trend={ordersTrend}
+          trendDirection={ordersDir}
         />
         <StatCard
           label="Tổng người dùng"
@@ -79,8 +115,8 @@ export default function AdminDashboardPage() {
           icon="👥"
           iconBg="#f0fdf4"
           iconColor="#22c55e"
-          trend="+24 user mới"
-          trendDirection="up"
+          trend={usersTrend}
+          trendDirection={usersDir}
         />
         <StatCard
           label="Top sản phẩm"

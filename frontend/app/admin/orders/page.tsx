@@ -122,12 +122,20 @@ export default function AdminOrdersPage() {
                 Đang tải đơn hàng...
               </td>
             </tr>
+          ) : orders.length === 0 ? (
+            <tr>
+              <td colSpan={7} style={{ textAlign: "center", padding: "40px 20px" }}>
+                <p style={{ fontSize: "2.4rem", margin: "0 0 10px" }}>📦</p>
+                <h3 style={{ margin: "0 0 8px" }}>Trống</h3>
+                <p style={{ color: "var(--muted)", margin: 0 }}>Chưa có đơn hàng nào.</p>
+              </td>
+            </tr>
           ) : orders.map((order) => (
             <tr key={order.id}>
               <td>
-                <strong>{order.id}</strong>
+                <strong title={order.id}>{order.id.slice(0, 8)}...</strong>
               </td>
-              <td>{order.totalPrice.toLocaleString("vi-VN")}₫</td>
+              <td>{order.totalPrice.toLocaleString("vi-VN")} VNĐ</td>
               <td>
                 <span className="status-chip status-chip--info">{order.paymentMethod}</span>
               </td>
@@ -168,8 +176,8 @@ export default function AdminOrdersPage() {
                   year: "numeric",
                 })}
               </td>
-              <td>
-                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              <td style={{ whiteSpace: "nowrap" }}>
+                <div style={{ display: "flex", gap: "6px" }}>
                   {order.status === OrderStatus.PENDING ? (
                     <button className="btn-sm" onClick={() => handleConfirm(order.id)}>
                       Xác nhận
@@ -177,12 +185,12 @@ export default function AdminOrdersPage() {
                   ) : null}
                   {order.status === OrderStatus.CONFIRMED ? (
                     <button className="btn-sm" onClick={() => handleShip(order.id)}>
-                      Giao hàng
+                      Giao
                     </button>
                   ) : null}
                   {order.status === OrderStatus.PENDING || order.status === OrderStatus.CONFIRMED ? (
-                    <button className="btn-sm btn-outline" onClick={() => handleCancel(order.id)}>
-                      Hủy đơn
+                    <button className="btn-sm btn-outline" style={{ background: "#f8fafc", borderColor: "#cbd5e1", color: "#334155" }} onClick={() => handleCancel(order.id)}>
+                      Hủy
                     </button>
                   ) : null}
                   {order.paymentMethod === "MOMO" && order.paymentStatus === PaymentStatus.PAID ? (

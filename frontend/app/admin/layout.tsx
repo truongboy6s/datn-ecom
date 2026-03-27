@@ -101,11 +101,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <header className="admin-topbar">
         <div className="admin-topbar__inner">
           <div>
-            <p className="admin-topbar__label">Backoffice</p>
-            <strong>Admin Console</strong>
+            <p className="admin-topbar__label">
+              Admin Console 
+              {pathname === "/admin/products" ? " / Quản lý Sản phẩm" : 
+               pathname === "/admin/categories" ? " / Danh mục Trang" :
+               pathname === "/admin/orders" ? " / Quản lý Đơn hàng" :
+               pathname === "/admin/users" ? " / Quản lý Người dùng" :
+               pathname === "/admin/discounts" ? " / Mã Giảm Giá" :
+               pathname === "/admin/ai-insights" ? " / AI Phân Tích" :
+               " / Dashboard"}
+            </p>
+            <strong>{user?.name || "Backoffice"}</strong>
           </div>
-          <nav>
-            <Link href="/admin-auth/login">Tài khoản admin</Link>
+          <nav style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            {user ? (
+               <span style={{ color: "#dbe6ff", fontSize: "0.9rem" }}>🖖 Chào, {user.name}</span>
+            ) : (
+              <Link href="/admin-auth/login">Đăng nhập Admin</Link>
+            )}
             <Link href="/">← Xem trang user</Link>
           </nav>
         </div>

@@ -259,7 +259,7 @@ export default function AdminDiscountsPage() {
                 <th>Lượt dùng</th>
                 <th>Hết hạn</th>
                 <th>Trạng thái</th>
-                <th>Hành động</th>
+                <th style={{ textAlign: "center", width: 140 }}>Hành động</th>
               </tr>
             </thead>
             <tbody>
@@ -267,6 +267,14 @@ export default function AdminDiscountsPage() {
                 <tr>
                   <td colSpan={7} style={{ textAlign: "center", color: "var(--muted)", padding: "20px" }}>
                     Đang tải mã giảm giá...
+                  </td>
+                </tr>
+              ) : discounts.length === 0 ? (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: "center", padding: "40px 20px" }}>
+                    <p style={{ fontSize: "2.4rem", margin: "0 0 10px" }}>🎟️</p>
+                    <h3 style={{ margin: "0 0 8px" }}>Trống</h3>
+                    <p style={{ color: "var(--muted)", margin: 0 }}>Chưa có mã giảm giá nào.</p>
                   </td>
                 </tr>
               ) : discounts.map((discount) => (
@@ -292,7 +300,7 @@ export default function AdminDiscountsPage() {
                     >
                       {discount.discountType === "percentage"
                         ? `${discount.discount}%`
-                        : `${discount.discount.toLocaleString("vi-VN")}₫`}
+                        : `${discount.discount.toLocaleString("vi-VN")} VNĐ`}
                     </span>
                   </td>
                   <td>
@@ -314,8 +322,8 @@ export default function AdminDiscountsPage() {
                       {discount.isActive ? "Hoạt động" : "Ngừng"}
                     </span>
                   </td>
-                  <td>
-                    <div style={{ display: "flex", gap: 6 }}>
+                  <td style={{ textAlign: "center" }}>
+                    <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
                       <button
                         onClick={() => handleOpenForm(discount)}
                         className="btn btn-sm"
@@ -345,11 +353,6 @@ export default function AdminDiscountsPage() {
             </tbody>
           </table>
         </div>
-        {discounts.length === 0 && (
-          <p style={{ textAlign: "center", color: "var(--muted)", padding: "20px" }}>
-            Chưa có mã giảm giá nào. Hãy thêm mã giảm giá đầu tiên!
-          </p>
-        )}
       </div>
     </>
   );

@@ -101,4 +101,56 @@ export class OrderService {
   static async updateOrder(orderId: string, data: { status?: string; paymentStatus?: string }) {
     return OrderRepository.updateById(orderId, data);
   }
+
+  static async cancelOrderAndRestoreStock(orderId: string, newPaymentStatus: any) {
+    return prisma.$transaction(async (tx) => {
+      const order = await tx.order.findUnique({
+        where: { id: orderId },
+        include: { items: true },
+      });
+
+      if (!order || order.status === "CANCELLED") {
+        return null;
+      }
+
+      for (const item of order.items) {
+        await tx.product.update({
+          where: { id: item.productId },
+          data: { stock: { increment: item.quantity } },
+        });
+      }
+
+      const updated = await tx.order.update({
+        where: { id: orderId },
+        data: {
+          status: "CANCELLED",
+          paymentStatus: newPaymentStatus,
+        },
+      });
+
+      return updated;
+    });
+  }
+
+  static async autoCancelExpiredOrders() {
+    const expireTime = new Date(Date.now() - 15 * 60 * 1000);
+    const pendingOrders = await prisma.order.findMany({
+      where: {
+        status: "PENDING",
+        paymentStatus: "PENDING",
+        paymentMethod: { in: ["VNPAY", "MOMO"] },
+        createdAt: { lt: expireTime },
+      },
+      select: { id: true },
+    });
+
+    for (const order of pendingOrders) {
+      try {
+        console.log("Auto cancel order:", order.id);
+        await this.cancelOrderAndRestoreStock(order.id, "FAILED");
+      } catch (err) {
+        console.error("Failed to auto-cancel order:", order.id, err);
+      }
+    }
+  }
 }

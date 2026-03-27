@@ -111,7 +111,7 @@ export default function AdminUsersPage() {
             <th>Email</th>
             <th>Vai trò</th>
             <th>Ngày tham gia</th>
-            <th>Hành động</th>
+            <th style={{ textAlign: "center", width: 100 }}>Hành động</th>
           </tr>
         </thead>
         <tbody>
@@ -119,6 +119,14 @@ export default function AdminUsersPage() {
             <tr>
               <td colSpan={6} style={{ textAlign: "center", color: "var(--muted)", padding: "20px" }}>
                 Đang tải người dùng...
+              </td>
+            </tr>
+          ) : filteredUsers.length === 0 ? (
+            <tr>
+              <td colSpan={6} style={{ textAlign: "center", padding: "40px 20px" }}>
+                <p style={{ fontSize: "2.4rem", margin: "0 0 10px" }}>📭</p>
+                <h3 style={{ margin: "0 0 8px" }}>Trống</h3>
+                <p style={{ color: "var(--muted)", margin: 0 }}>Không tìm thấy người dùng nào.</p>
               </td>
             </tr>
           ) : filteredUsers.map((user) => (
@@ -136,8 +144,8 @@ export default function AdminUsersPage() {
               <td style={{ color: "var(--muted)", fontSize: ".85rem" }}>
                 {new Date(user.createdAt).toLocaleDateString("vi-VN")}
               </td>
-              <td>
-                <div style={{ display: "flex", gap: "8px" }}>
+              <td style={{ textAlign: "center" }}>
+                <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
                   <button className="btn-icon" title="Sửa quyền" onClick={() => handleEditRole(user)}>
                     🔑
                   </button>
@@ -174,7 +182,7 @@ export default function AdminUsersPage() {
             </select>
           </label>
           <div className="modal-actions">
-            <button type="button" className="btn-outline" onClick={() => setIsModalOpen(false)}>Hủy</button>
+            <button type="button" className="btn-outline" style={{ background: "#f8fafc", borderColor: "#cbd5e1", color: "#334155" }} onClick={() => setIsModalOpen(false)}>Hủy</button>
             <button type="submit" className="btn-primary">Cập nhật</button>
           </div>
         </form>

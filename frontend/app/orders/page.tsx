@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { apiClient } from "@/lib/api";
 import Link from "next/link";
+import { useAuthContext } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 import { reviewService } from "@/services/review.service";
 import { orderService } from "@/services/order.service";
 
@@ -57,6 +59,9 @@ function orderStatusLabel(status: string, paymentStatus: string) {
 }
 
 export default function OrdersPage() {
+  const { user, isHydrated } = useAuthContext();
+  const router = useRouter();
+
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -64,17 +69,26 @@ export default function OrdersPage() {
   const [reviewedProductIds, setReviewedProductIds] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    apiClient("/orders")
-      .then(res => {
-        setOrders(res.data || []);
-      })
-      .catch(err => {
-        setError(err.message || "Failed to fetch orders. Ensure you are logged in.");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, []);
+    if (isHydrated && !user) {
+      router.push("/login");
+      return;
+    }
+
+    if (user) {
+      apiClient("/orders")
+        .then(res => {
+          setOrders(res.data || []);
+        })
+        .catch(err => {
+          setError(err.message || "Failed to fetch orders. Ensure you are logged in.");
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  }, [isHydrated, user, router]);
+
+  if (!isHydrated || !user) return null;
 
   if (loading) return <main className="container page"><p style={{ textAlign: "center", padding: "80px" }}>Đang tải đơn hàng...</p></main>;
 

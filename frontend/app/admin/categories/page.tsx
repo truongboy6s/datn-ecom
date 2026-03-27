@@ -147,7 +147,7 @@ export default function AdminCategoriesPage() {
             <th>Tên danh mục</th>
             <th>Slug</th>
             <th>Số sản phẩm</th>
-            <th>Hành động</th>
+            <th style={{ textAlign: "center", width: 100 }}>Hành động</th>
           </tr>
         </thead>
         <tbody>
@@ -155,6 +155,14 @@ export default function AdminCategoriesPage() {
             <tr>
               <td colSpan={5} style={{ textAlign: "center", color: "var(--muted)", padding: "20px" }}>
                 Đang tải danh mục...
+              </td>
+            </tr>
+          ) : filteredCategories.length === 0 ? (
+            <tr>
+              <td colSpan={5} style={{ textAlign: "center", padding: "40px 20px" }}>
+                <p style={{ fontSize: "2.4rem", margin: "0 0 10px" }}>📭</p>
+                <h3 style={{ margin: "0 0 8px" }}>Trống</h3>
+                <p style={{ color: "var(--muted)", margin: 0 }}>Chưa có danh mục nào.</p>
               </td>
             </tr>
           ) : filteredCategories.map((cat) => (
@@ -174,8 +182,8 @@ export default function AdminCategoriesPage() {
                   {cat.productCount ?? 0} sản phẩm
                 </span>
               </td>
-              <td>
-                <div style={{ display: "flex", gap: "8px" }}>
+              <td style={{ textAlign: "center" }}>
+                <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
                   <button className="btn-icon" title="Sửa" onClick={() => handleOpenModal(cat)}>
                     ✏️
                   </button>
@@ -216,7 +224,7 @@ export default function AdminCategoriesPage() {
             />
           </label>
           <div className="modal-actions">
-            <button type="button" className="btn-outline" onClick={() => setIsModalOpen(false)}>Hủy</button>
+            <button type="button" className="btn-outline" style={{ background: "#f8fafc", borderColor: "#cbd5e1", color: "#334155" }} onClick={() => setIsModalOpen(false)}>Hủy</button>
             <button type="submit" className="btn-primary">Lưu</button>
           </div>
         </form>

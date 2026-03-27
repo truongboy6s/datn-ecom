@@ -1,4 +1,9 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useCart, showToast } from "@/hooks/useCart";
+import { useAuthContext } from "@/context/AuthContext";
 import type { Product } from "@/types/domain";
 
 interface ProductCardProps {
@@ -25,6 +30,25 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const isHot = product.stock <= 10;
   const ratingValue = Math.max(0, Math.min(5, product.averageRating ?? 0));
   const reviewCount = product.reviewCount ?? 0;
+
+  const router = useRouter();
+  const { addToCart } = useCart();
+  const { user } = useAuthContext();
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent navigating to product detail if button is clicked
+    if (!user) {
+      showToast("Vui lòng đăng nhập để mua hàng", true);
+      router.push("/login");
+      return;
+    }
+    
+    if (onAddToCart) {
+      onAddToCart(product);
+    } else {
+      router.push(`/checkout?buyNow=${product.id}:1`);
+    }
+  };
 
   return (
     <article className="product-card">
@@ -54,11 +78,9 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
       </p>
       <div className="product-card__bottom">
         <strong>{product.price.toLocaleString("vi-VN")} ₫</strong>
-        {onAddToCart ? (
-          <button onClick={() => onAddToCart(product)} disabled={product.stock <= 0} className="btn-sm">
-            {product.stock > 0 ? "🛒 Thêm" : "Hết hàng"}
-          </button>
-        ) : null}
+        <button onClick={handleAddToCart} disabled={product.stock <= 0} className="btn-sm">
+          {product.stock > 0 ? "🛒 Mua ngay" : "Hết hàng"}
+        </button>
       </div>
     </article>
   );

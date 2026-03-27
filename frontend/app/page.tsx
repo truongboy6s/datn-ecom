@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ProductCard } from "@/components/product/ProductCard";
 import { apiServer } from "@/lib/api";
+import { HeroAuthActions, OrderTrackingActions } from "@/components/home/AuthDependentLinks";
 import type { Product } from "@/types/domain";
 
 export const revalidate = 60;
@@ -46,23 +47,28 @@ export default async function HomePage() {
   return (
     <main className="container page">
       {/* ── Hero ────────────────────────────────────────── */}
-      <section className="hero-banner">
+      <section 
+        className="hero-banner" 
+        style={{
+          backgroundImage: "linear-gradient(to right, rgba(255, 255, 255, 0.95) 40%, rgba(255, 255, 255, 0.2)), url('https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=2070&auto=format&fit=crop')",
+          backgroundSize: "cover",
+          backgroundPosition: "center right",
+          color: "var(--text)"
+        }}
+      >
         <div>
           <p className="hero-tag">⚡ FLASH SALE 3.3</p>
-          <h1>Siêu sale đồ điện tử,<br />ưu đãi đến 50%</h1>
-          <p>
-            Mua sắm nhanh, giá tốt, giao nhanh 2H. AI chatbot gợi ý sản phẩm phù hợp nhu cầu.
+          <h1 style={{ fontSize: "2.4rem", textShadow: "0 2px 10px rgba(255,255,255,0.8)" }}>Siêu sale đồ điện tử,<br />ưu đãi đến 50%</h1>
+          <p style={{ fontWeight: 500, fontSize: "1.05rem" }}>
+            Mua sắm thông minh, giá tốt, giao siêu tốc 2H.<br/> Trải nghiệm AI chatbot gợi ý sản phẩm ngay hôm nay.
           </p>
-          <div className="actions-row">
-            <Link href="/products" className="btn-primary">🛒 Mua ngay</Link>
-            <Link href="/register" className="btn-outline">🎁 Nhận voucher mới</Link>
-          </div>
+          <HeroAuthActions />
         </div>
-        <div className="hero-card">
+        <div className="hero-card" style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(10px)", border: "none", boxShadow: "0 8px 32px rgba(0,0,0,0.1)" }}>
           <h3>🔥 Deal trong ngày</h3>
-          <p>Laptop gaming từ 18.990.000₫</p>
-          <p>Tai nghe Bluetooth giảm 35%</p>
-          <p>Combo office tiết kiệm tối đa</p>
+          <p style={{ fontWeight: 600 }}>💻 Laptop gaming từ 18.990.000₫</p>
+          <p style={{ fontWeight: 600 }}>🎧 Tai nghe Bluetooth giảm 35%</p>
+          <p style={{ fontWeight: 600 }}>⌨️ Combo office tiết kiệm tối đa</p>
           <p style={{ marginTop: 10, fontSize: ".82rem", color: "var(--muted)" }}>
             Áp dụng đến 23:59 hôm nay
           </p>
@@ -93,29 +99,35 @@ export default async function HomePage() {
         <article className="entry-card">
           <h2>🚚 Đơn hàng của bạn</h2>
           <p>Theo dõi trạng thái thanh toán và vận chuyển theo thời gian thực.</p>
-          <div className="actions-row">
-            <Link href="/orders" className="btn-primary">Theo dõi ngay</Link>
-            <Link href="/login" className="btn-outline">Đăng nhập</Link>
-          </div>
+          <OrderTrackingActions />
         </article>
       </section>
 
       {/* ── Promo ───────────────────────────────────────── */}
       <section className="promo-grid">
-        <article>
+        <article style={{
+          backgroundImage: "linear-gradient(rgba(255,255,255,0.85), rgba(255,255,255,0.95)), url('https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=800&auto=format&fit=crop')",
+          backgroundSize: "cover", backgroundPosition: "center"
+        }}>
           <div className="promo-icon">🎟️</div>
           <h3>Voucher 200K cho user mới</h3>
-          <p>Đăng ký tài khoản để nhận mã giảm giá và flash sale riêng.</p>
+          <p>Đăng ký tài khoản để nhận mã giảm giá và flash sale ưu đãi riêng.</p>
         </article>
-        <article>
+        <article style={{
+          backgroundImage: "linear-gradient(rgba(255,255,255,0.85), rgba(255,255,255,0.95)), url('https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?q=80&w=800&auto=format&fit=crop')",
+          backgroundSize: "cover", backgroundPosition: "center"
+        }}>
           <div className="promo-icon">🚀</div>
           <h3>Freeship toàn quốc</h3>
-          <p>Áp dụng cho đơn từ 499.000₫ trong hệ thống.</p>
+          <p>Áp dụng cho mọi đơn hàng từ 499.000₫ cập bến tận nhà miễn phí.</p>
         </article>
-        <article>
+        <article style={{
+          backgroundImage: "linear-gradient(rgba(255,255,255,0.85), rgba(255,255,255,0.95)), url('https://images.unsplash.com/photo-1563013544-824ae1b704d3?q=80&w=800&auto=format&fit=crop')",
+          backgroundSize: "cover", backgroundPosition: "center"
+        }}>
           <div className="promo-icon">💳</div>
-          <h3>Trả góp 0%</h3>
-          <p>Hỗ trợ trả góp qua đối tác thanh toán liên kết.</p>
+          <h3>Trả góp 0% tiện lợi</h3>
+          <p>Hỗ trợ trả góp qua thẻ tín dụng và đối tác thanh toán liên kết nhanh gọn.</p>
         </article>
       </section>
 

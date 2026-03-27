@@ -52,14 +52,14 @@ export default function CartPage() {
                     </button>
                   </div>
                 </div>
-                <div style={{ textAlign: "right" }}>
-                  <p className="cart-item__price">
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", justifyContent: "space-between", alignSelf: "stretch", padding: "4px 0" }}>
+                  <p className="cart-item__price" style={{ margin: 0 }}>
                     {(item.product.price * item.quantity).toLocaleString("vi-VN")}₫
                   </p>
                   <button
                     className="btn-sm"
                     onClick={() => removeFromCart(item.product.id)}
-                    style={{ color: "var(--danger)", borderColor: "var(--danger-bg)", marginTop: 6 }}
+                    style={{ color: "var(--danger)", borderColor: "var(--danger-bg)" }}
                   >
                     Xóa
                   </button>

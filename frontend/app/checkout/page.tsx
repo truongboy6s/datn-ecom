@@ -1,16 +1,23 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useCart } from "@/hooks/useCart";
 import { discountService } from "@/services/discount.service";
 import { orderService } from "@/services/order.service";
-import type { Discount } from "@/types/domain";
+import { productService } from "@/services/product.service";
+import type { Discount, Product } from "@/types/domain";
 
 type PaymentMethod = "COD" | "MOMO" | "VNPAY";
 
-export default function CheckoutPage() {
-  const { items, total, isHydrated, clearCart } = useCart();
+function CheckoutContent() {
+  const searchParams = useSearchParams();
+  const buyNowParam = searchParams.get("buyNow");
+  const cartState = useCart();
+
+  const [buyNowItem, setBuyNowItem] = useState<{ product: Product; quantity: number } | null>(null);
+  const [buyNowLoading, setBuyNowLoading] = useState(!!buyNowParam);
   const [payment, setPayment] = useState<PaymentMethod>("COD");
   const [submitted, setSubmitted] = useState(false);
   const [discounts, setDiscounts] = useState<Discount[]>([]);
@@ -19,8 +26,31 @@ export default function CheckoutPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // Derive cart items VS buyNow item
+  const isHydrated = buyNowParam ? !buyNowLoading : cartState.isHydrated;
+  const items = buyNowParam ? (buyNowItem ? [buyNowItem] : []) : cartState.items;
+  const total = buyNowParam ? (buyNowItem ? buyNowItem.product.price * buyNowItem.quantity : 0) : cartState.total;
+  const clearCart = buyNowParam ? () => {} : cartState.clearCart;
+
   useEffect(() => {
     let active = true;
+
+    if (buyNowParam) {
+      const [productId, qtyStr] = buyNowParam.split(":");
+      const qty = parseInt(qtyStr, 10) || 1;
+      productService
+        .getById(productId)
+        .then((p) => {
+          if (!active) return;
+          setBuyNowItem({ product: p, quantity: qty });
+          setBuyNowLoading(false);
+        })
+        .catch(() => {
+          if (!active) return;
+          setBuyNowLoading(false);
+        });
+    }
+
     discountService
       .listActive()
       .then((res) => {
@@ -237,11 +267,11 @@ export default function CheckoutPage() {
                   discountCode: appliedDiscount?.code,
                 });
                 const paymentUrl = res.data?.paymentUrl;
+                clearCart(); // Clear cart before redirecting
                 if (paymentUrl) {
                   window.location.href = paymentUrl;
                   return;
                 }
-                clearCart();
                 setSubmitted(true);
               } catch (err: any) {
                 let message = err.message || "Lỗi tạo đơn hàng.";
@@ -270,5 +300,19 @@ export default function CheckoutPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="container page" style={{ textAlign: "center", padding: "80px 20px" }}>
+          Đang tải thanh toán...
+        </main>
+      }
+    >
+      <CheckoutContent />
+    </Suspense>
   );
 }

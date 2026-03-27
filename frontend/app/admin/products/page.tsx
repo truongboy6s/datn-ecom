@@ -166,13 +166,13 @@ export default function AdminProductsPage() {
       <table className="table-block">
         <thead>
           <tr>
-            <th>Ảnh</th>
+            <th style={{ width: 60, textAlign: "center" }}>Ảnh</th>
             <th>Tên</th>
             <th>Danh mục</th>
             <th>Giá</th>
             <th>Tồn kho</th>
             <th>Trạng thái</th>
-            <th>Hành động</th>
+            <th style={{ textAlign: "center", width: 100 }}>Hành động</th>
           </tr>
         </thead>
         <tbody>
@@ -182,9 +182,17 @@ export default function AdminProductsPage() {
                 Đang tải sản phẩm...
               </td>
             </tr>
+          ) : filteredProducts.length === 0 ? (
+            <tr>
+              <td colSpan={7} style={{ textAlign: "center", padding: "40px 20px" }}>
+                <p style={{ fontSize: "2.4rem", margin: "0 0 10px" }}>📭</p>
+                <h3 style={{ margin: "0 0 8px" }}>Trống</h3>
+                <p style={{ color: "var(--muted)", margin: 0 }}>Không tìm thấy sản phẩm nào.</p>
+              </td>
+            </tr>
           ) : filteredProducts.map((product) => (
             <tr key={product.id}>
-              <td>
+              <td style={{ textAlign: "center" }}>
                 <img
                   className="table-product-thumb"
                   src={product.imageUrl || ""}
@@ -193,11 +201,11 @@ export default function AdminProductsPage() {
               </td>
               <td><strong>{product.name}</strong></td>
               <td>{product.category?.name ?? "N/A"}</td>
-              <td>{product.price.toLocaleString("vi-VN")}₫</td>
+              <td>{product.price.toLocaleString("vi-VN")} VNĐ</td>
               <td>{product.stock}</td>
               <td>{stockBadge(product.stock)}</td>
-              <td>
-                <div style={{ display: "flex", gap: "8px" }}>
+              <td style={{ textAlign: "center" }}>
+                <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
                   <button className="btn-icon" title="Sửa" onClick={() => handleOpenModal(product)}>
                     ✏️
                   </button>
@@ -229,7 +237,7 @@ export default function AdminProductsPage() {
           </label>
           <div className="admin-form-row">
             <label>
-              Giá (₫)
+              Giá (VNĐ)
               <input 
                 type="number" 
                 value={formData.price} 
@@ -276,8 +284,8 @@ export default function AdminProductsPage() {
             />
           </label>
           <div className="modal-actions">
-            <button type="button" className="btn-outline" onClick={() => setIsModalOpen(false)}>Hủy</button>
-            <button type="submit" className="btn-primary">Lưu</button>
+            <button type="button" className="btn-outline" style={{ background: "#f8fafc", borderColor: "#cbd5e1", color: "#334155" }} onClick={() => setIsModalOpen(false)}>Hủy</button>
+            <button type="submit" className="btn-primary">Lưu sản phẩm</button>
           </div>
         </form>
       </Modal>

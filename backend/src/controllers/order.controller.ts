@@ -88,17 +88,11 @@ export class OrderController {
 
       if (order.paymentStatus === "PAID" && order.paymentMethod === "MOMO") {
         await PaymentService.refundMoMoPayment(order);
-        const updated = await OrderService.updateOrder(orderId, {
-          status: "CANCELLED",
-          paymentStatus: "REFUNDED",
-        });
+        const updated = await OrderService.cancelOrderAndRestoreStock(orderId, "REFUNDED");
         return sendSuccess(res, updated, "Hủy đơn và hoàn tiền thành công");
       }
 
-      const updated = await OrderService.updateOrder(orderId, {
-        status: "CANCELLED",
-        paymentStatus: "FAILED",
-      });
+      const updated = await OrderService.cancelOrderAndRestoreStock(orderId, "FAILED");
       return sendSuccess(res, updated, "Hủy đơn thành công");
     } catch (error) {
       next(error);

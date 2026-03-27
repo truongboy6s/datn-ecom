@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ProductCard } from "@/components/product/ProductCard";
-import { useCart } from "@/hooks/useCart";
+import { useCart, showToast } from "@/hooks/useCart";
 import type { Product, Review } from "@/types/domain";
 import { reviewService } from "@/services/review.service";
 import { useAuthContext } from "@/context/AuthContext";
@@ -25,6 +26,7 @@ function slugify(value: string) {
 }
 
 export function ProductDetailClient({ product }: ProductDetailClientProps) {
+  const router = useRouter();
   const cart = useCart();
   const { user, isHydrated } = useAuthContext();
   const [qty, setQty] = useState(1);
@@ -77,21 +79,53 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
 
   const handleAddToCart = async () => {
     setCartError(null);
+    if (!user) {
+      showToast("Vui lòng đăng nhập để mua hàng", true);
+      router.push("/login");
+      return;
+    }
+    
     try {
       const latest = await productService.getById(product.id);
       setCurrentStock(latest.stock);
       if (latest.stock <= 0) {
-        setCartError("Sản phẩm đã hết hàng.");
+        showToast("Sản phẩm đã hết hàng.", true);
         return;
       }
       if (qty > latest.stock) {
         setQty(latest.stock);
-        setCartError("Số lượng vượt tồn kho hiện có.");
+        showToast("Số lượng vượt tồn kho hiện có.", true);
         return;
       }
       cart.addToCart({ ...product, stock: latest.stock }, qty);
     } catch {
-      setCartError("Không thể kiểm tra tồn kho. Vui lòng thử lại.");
+      showToast("Không thể kiểm tra tồn kho. Vui lòng thử lại.", true);
+    }
+  };
+
+  const handleBuyNow = async () => {
+    setCartError(null);
+    if (!user) {
+      showToast("Vui lòng đăng nhập để mua hàng", true);
+      router.push("/login");
+      return;
+    }
+    
+    try {
+      const latest = await productService.getById(product.id);
+      setCurrentStock(latest.stock);
+      if (latest.stock <= 0) {
+        showToast("Sản phẩm đã hết hàng.", true);
+        return;
+      }
+      if (qty > latest.stock) {
+        setQty(latest.stock);
+        showToast("Số lượng vượt tồn kho hiện có.", true);
+        return;
+      }
+      router.push(`/checkout?buyNow=${product.id}:${qty}`);
+    } catch {
+      showToast("Không thể kiểm tra tồn kho. Vui lòng thử lại.", true);
     }
   };
 
@@ -170,6 +204,9 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
           <div className="actions-row">
             <button className="btn-primary" onClick={handleAddToCart} disabled={currentStock <= 0}>
               🛒 Thêm vào giỏ
+            </button>
+            <button className="btn-primary" style={{ background: "var(--brand-dark)", borderColor: "var(--brand-dark)" }} onClick={handleBuyNow} disabled={currentStock <= 0}>
+              💳 Mua ngay
             </button>
             <Link href="/products" className="btn-outline">
               ← Quay lại

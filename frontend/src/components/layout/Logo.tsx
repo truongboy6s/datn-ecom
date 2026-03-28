@@ -26,7 +26,7 @@ export function Logo() {
           strokeLinejoin="round"
         />
       </svg>
-      <span>AI E-Commerce</span>
+      <span>DT E-commerce</span>
     </Link>
   );
 }

@@ -3,8 +3,8 @@ import "./globals.css";
 import { AppShell } from "@/components/layout/AppShell";
 
 export const metadata: Metadata = {
-  title: "AI E-Commerce",
-  description: "AI-powered e-commerce platform"
+  title: "DT E-Commerce",
+  description: "DT-powered e-commerce platform"
 };
 
 export default function RootLayout({

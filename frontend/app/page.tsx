@@ -126,8 +126,8 @@ export default async function HomePage() {
           backgroundSize: "cover", backgroundPosition: "center"
         }}>
           <div className="promo-icon">💳</div>
-          <h3>Trả góp 0% tiện lợi</h3>
-          <p>Hỗ trợ trả góp qua thẻ tín dụng và đối tác thanh toán liên kết nhanh gọn.</p>
+          <h3>Thanh toán tiện lợi</h3>
+          <p>Hỗ trợ thanh toán qua thẻ tín dụng và đối tác thanh toán liên kết nhanh gọn.</p>
         </article>
       </section>
 

@@ -6,7 +6,7 @@ export function MainFooter() {
       <div className="container">
         <div className="footer-grid">
           <div className="footer-column">
-            <h4>AI E-Commerce</h4>
+            <h4>DT E-commerce</h4>
             <p>Website thương mại điện tử tích hợp AI hỗ trợ kinh doanh.</p>
             <div className="footer-social">
               <a href="#" aria-label="Facebook">
@@ -60,7 +60,7 @@ export function MainFooter() {
 
         <div className="footer-bottom">
           <p>&copy; {new Date().getFullYear()} DATN-Ecom. All rights reserved.</p>
-          <p>Powered by AI E-Commerce Platform</p>
+          <p>Powered by DT E-commerce Platform</p>
         </div>
       </div>
     </footer>

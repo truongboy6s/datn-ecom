@@ -200,6 +200,24 @@ export class PaymentController {
     }
   }
 
+  static async paymentStatus(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { orderId } = req.body as { orderId?: string };
+      if (!orderId) {
+        return sendError(res, "Thieu ma don hang", null, 400);
+      }
+
+      const order = await OrderRepository.findById(orderId);
+      if (!order) {
+        return sendError(res, "Khong tim thay don hang", null, 404);
+      }
+
+      return res.status(200).json({ status: order.paymentStatus });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async momoCreate(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { orderId } = req.body as { orderId?: string };
